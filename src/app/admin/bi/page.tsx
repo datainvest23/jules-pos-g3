@@ -3,8 +3,8 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button';
-import { BarChartBig, Users, TrendingUp, ShoppingCart, Brain, Loader2, AlertTriangle } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { BarChartBig, Users, TrendingUp, ShoppingCart, Brain, Loader2, AlertTriangle as AlertTriangleIcon } from "lucide-react"; // Renamed AlertTriangle to avoid conflict
 import { fetchAllCustomers, fetchAllProducts } from '@/lib/api';
 import type { Customer, Product, TransactionSummary, SuggestPromotionalProductInput, SuggestPromotionalProductOutput } from '@/types';
 import { format, subDays, startOfDay, endOfDay, eachDayOfInterval, parseISO } from 'date-fns';
@@ -15,6 +15,7 @@ import { ChartConfig, ChartContainer, ChartTooltipContent } from "@/components/u
 
 import { suggestPromotionalProduct } from '@/ai/flows/suggest-promotional-product-flow';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 
 interface DailySale {
@@ -75,7 +76,7 @@ export default function SalesIntelligencePage() {
         const formattedDailySales = Object.entries(salesByDay)
           .map(([date, total]) => ({ date, total, shortDate: format(parseISO(date), 'MMM d') }))
           .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        setDailySales(formattedDailySales as any); // any for shortDate, will fix type later if needed
+        setDailySales(formattedDailySales as any); 
 
 
         // Calculate Top Customers
@@ -152,7 +153,7 @@ export default function SalesIntelligencePage() {
       <Card className="bg-destructive/10 border-destructive">
         <CardHeader>
           <CardTitle className="flex items-center text-destructive">
-            <AlertTriangle className="w-6 h-6 mr-2" />
+            <AlertTriangleIcon className="w-6 h-6 mr-2" />
             Error Loading Data
           </CardTitle>
         </CardHeader>
@@ -189,7 +190,7 @@ export default function SalesIntelligencePage() {
                     tickLine={false} 
                     axisLine={false} 
                     tickMargin={8} 
-                    tickFormatter={(value) => value.slice(0, 6)} // Shorten date string if needed
+                    tickFormatter={(value) => value.slice(0, 6)} 
                   />
                   <YAxis 
                     tickFormatter={(value) => `$${value}`}
@@ -254,7 +255,7 @@ export default function SalesIntelligencePage() {
           )}
           {errorPromotion && !isLoadingPromotion && (
              <Alert variant="destructive" className="mt-4">
-                <AlertTriangle className="h-4 w-4"/>
+                <AlertTriangleIcon className="h-4 w-4"/>
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{errorPromotion}</AlertDescription>
             </Alert>
@@ -278,4 +279,3 @@ export default function SalesIntelligencePage() {
     </div>
   );
 }
-
