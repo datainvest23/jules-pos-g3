@@ -29,3 +29,10 @@ export interface Customer {
   customerSince: Date;
   // purchaseHistory?: string[]; // Array of order IDs or similar - for future use
 }
+
+export interface ReceiptData {
+  product: Product;
+  transactionId: string;
+  quantity: number;
+  timestamp: Date;
+}

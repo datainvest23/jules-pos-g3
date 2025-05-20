@@ -2,23 +2,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Product } from '@/types';
+import type { Product, ReceiptData } from '@/types';
 import { fetchAllProducts } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
 import PriceViewer from '@/components/PriceViewer';
 import ProductSuggester from '@/components/ProductSuggester';
 import QrCodeDisplay from '@/components/QrCodeDisplay';
+import ReceiptDialog from '@/components/ReceiptDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Leaf, Loader2, X, UserCog } from 'lucide-react';
+import { Leaf, Loader2, X, UserCog, ShoppingCart } from 'lucide-react';
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -53,6 +56,21 @@ export default function HomePage() {
       return <Badge variant="outline" className="text-accent-foreground border-accent">Low Stock ({product.stock} left)</Badge>;
     }
     return <Badge variant="default">In Stock</Badge>;
+  };
+
+  const handleBuyNow = (product: Product) => {
+    if (product.stock === 0) {
+      alert("This product is out of stock and cannot be purchased.");
+      return;
+    }
+    const newReceiptData: ReceiptData = {
+      product: product,
+      transactionId: `TXN-${Date.now().toString().slice(-8)}`,
+      quantity: 1, // Hardcoded for now
+      timestamp: new Date(),
+    };
+    setReceiptData(newReceiptData);
+    setIsReceiptDialogOpen(true);
   };
 
   return (
@@ -147,6 +165,14 @@ export default function HomePage() {
                       </p>
                     )}
                   </div>
+                  <Button 
+                    onClick={() => handleBuyNow(selectedProduct)} 
+                    className="w-full mt-4"
+                    disabled={selectedProduct.stock === 0}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Buy Now
+                  </Button>
                   <ProductSuggester product={selectedProduct} />
                   <QrCodeDisplay productId={selectedProduct.id} productName={selectedProduct.name} />
                 </CardContent>
@@ -163,6 +189,12 @@ export default function HomePage() {
           </p>
         </div>
       </footer>
+      
+      <ReceiptDialog 
+        isOpen={isReceiptDialogOpen} 
+        onClose={() => setIsReceiptDialogOpen(false)} 
+        receiptData={receiptData} 
+      />
     </div>
   );
 }
