@@ -5,11 +5,11 @@ export interface Product {
   description: string;
   category: string; // e.g., 'Supplements', 'Organic Foods', 'Wellness Items'
   price: number;
-  salePrice?: number;
+  salePrice?: number; // Optional, should be a number or undefined/null
   imageUrl: string;
   stock: number;
   optimumStock?: number | null;
-  supplierId?: string | null;
+  supplierId?: string | null; // Foreign key to Supplier
 }
 
 export interface SuggestedProduct {
@@ -61,7 +61,7 @@ export interface Supplier {
   contactPerson?: string | null;
   email: string;
   phone?: string | null;
-  address?: {
+  address?: { // This structure is maintained in the app type
     street: string;
     city: string;
     state: string;
@@ -76,8 +76,8 @@ export interface ProductSalesHistoryItem {
   customerId?: string | null;
   customerName?: string | null;
   date: Date;
-  quantitySold: number; // This will be simulated for now
-  saleAmount: number; // This will be simulated for now (product price * quantity)
+  quantitySold: number; 
+  saleAmount: number; 
 }
 
 // For AI Product Promotion Flow (View Product Page)
@@ -88,7 +88,7 @@ export interface GenerateProductPromotionInput {
   productCategory: string;
   price: number;
   salePrice?: number | null;
-  // imageUrl is not directly used by LLM but good for potential future context
+  imageUrl: string; // Added imageUrl as per flow
   recentSalesSummary: Array<{ customerName: string | null, date: string, quantity: number }>;
 }
 
@@ -108,7 +108,6 @@ interface ProductSummaryForAISuggestion {
 }
 export interface SuggestPromotionalProductInput {
   products: ProductSummaryForAISuggestion[];
-  // We could add overall sales trends here if available later
 }
 
 export interface SuggestPromotionalProductOutput {
