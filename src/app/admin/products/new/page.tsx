@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -22,7 +23,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, PlusCircle } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Loader2 } from 'lucide-react';
+import { fetchAllSuppliers } from '@/lib/api';
+import type { Supplier } from '@/types';
 
 const productCategories = ["Supplements", "Organic Foods", "Wellness Items", "Beverages", "Snacks"] as const;
 
@@ -31,6 +34,7 @@ const productFormSchema = z.object({
   name: z.string().min(3, "Product name must be at least 3 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
   category: z.enum(productCategories, { required_error: "Category is required."}),
+  supplierId: z.string().optional().nullable(),
   price: z.coerce.number({invalid_type_error: "Price must be a number."}).positive("Price must be positive."),
   salePrice: z.coerce.number({invalid_type_error: "Sale price must be a number."}).nonnegative("Sale price cannot be negative.").optional().nullable(),
   stock: z.coerce.number({invalid_type_error: "Stock must be a number."}).int("Stock must be a whole number.").min(0, "Stock cannot be negative."),
@@ -42,6 +46,8 @@ export type ProductFormValues = z.infer<typeof productFormSchema>;
 export default function AddNewProductPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -49,16 +55,36 @@ export default function AddNewProductPage() {
       id: '',
       name: '',
       description: '',
-      // category field has no default, so Select placeholder will show
-      price: undefined, // Use undefined for coerce.number to trigger required error if empty
+      category: undefined,
+      supplierId: null,
+      price: undefined,
       salePrice: null, 
-      stock: undefined, // Use undefined for coerce.number
+      stock: undefined,
       imageUrl: '',
     },
   });
 
+  useEffect(() => {
+    async function loadSuppliers() {
+      setIsLoadingSuppliers(true);
+      try {
+        const fetchedSuppliers = await fetchAllSuppliers();
+        setSuppliers(fetchedSuppliers);
+      } catch (error) {
+        console.error("Failed to load suppliers:", error);
+        toast({
+          title: "Error",
+          description: "Could not load suppliers for selection.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingSuppliers(false);
+      }
+    }
+    loadSuppliers();
+  }, [toast]);
+
   async function onSubmit(data: ProductFormValues) {
-    // TODO: Implement actual product creation logic (e.g., API call to save product)
     console.log('Product data submitted:', data);
     toast({
       title: "Product Submitted (Simulated)",
@@ -72,9 +98,6 @@ export default function AddNewProductPage() {
       ),
       variant: "default",
     });
-    // Potentially reset form or redirect:
-    // form.reset();
-    // router.push('/admin/products'); 
   }
 
   return (
@@ -114,7 +137,7 @@ export default function AddNewProductPage() {
                 />
                 <FormField
                   control={form.control}
-                  name="id" // SKU/ID
+                  name="id" 
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>SKU / Product ID</FormLabel>
@@ -169,6 +192,50 @@ export default function AddNewProductPage() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="supplierId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Supplier <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value ?? undefined}
+                        disabled={isLoadingSuppliers || suppliers.length === 0}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={isLoadingSuppliers ? "Loading suppliers..." : "Select a supplier"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {isLoadingSuppliers ? (
+                            <div className="flex items-center justify-center p-2">
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading...
+                            </div>
+                          ) : suppliers.length === 0 ? (
+                             <SelectItem value="no-supplier" disabled>No suppliers available</SelectItem>
+                          ) : (
+                            <>
+                              <SelectItem value=""><em>None</em></SelectItem>
+                              {suppliers.map(supplier => (
+                                <SelectItem key={supplier.id} value={supplier.id}>{supplier.name}</SelectItem>
+                              ))}
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        {suppliers.length > 0 ? "Choose the supplier for this product." : isLoadingSuppliers ? "" : 
+                        <span>No suppliers found. <Link href="/admin/suppliers/new" className="text-primary hover:underline">Add a supplier?</Link></span>}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
                  <FormField
                   control={form.control}
                   name="stock"
@@ -188,9 +255,6 @@ export default function AddNewProductPage() {
                     </FormItem>
                   )}
                 />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
                 <FormField
                   control={form.control}
                   name="price"
@@ -211,28 +275,29 @@ export default function AddNewProductPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="salePrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sale Price ($) <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.01" 
-                          placeholder="e.g., 15.99" 
-                          {...field} 
-                          onChange={event => field.onChange(event.target.value === '' ? null : +event.target.value)}
-                          value={field.value ?? ''}
-                        />
-                      </FormControl>
-                      <FormDescription>Leave blank if the product is not on sale.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
+
+              <FormField
+                control={form.control}
+                name="salePrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sale Price ($) <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        placeholder="e.g., 15.99" 
+                        {...field} 
+                        onChange={event => field.onChange(event.target.value === '' ? null : +event.target.value)}
+                        value={field.value ?? ''}
+                      />
+                    </FormControl>
+                    <FormDescription>Leave blank if the product is not on sale.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -267,4 +332,3 @@ export default function AddNewProductPage() {
     </div>
   );
 }
-
