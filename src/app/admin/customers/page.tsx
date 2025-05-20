@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table";
-import { PlusCircle, Users, Pencil, Trash2, Loader2 } from "lucide-react";
+import { PlusCircle, Users, Pencil, Trash2, Loader2, Eye } from "lucide-react";
 
 export default function CustomerManagementPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -56,7 +56,7 @@ export default function CustomerManagementPage() {
         <CardHeader>
           <CardTitle>Customer List</CardTitle>
           <CardDescription>
-            A list of all customers in your store.
+            A list of all customers in your store. Click on a Customer ID to view details.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -79,18 +79,30 @@ export default function CustomerManagementPage() {
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Customer Since</TableHead>
-                  <TableHead className="text-center w-[150px]">Actions</TableHead>
+                  <TableHead className="text-center w-[180px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {customers.map((customer) => (
                   <TableRow key={customer.id}>
-                    <TableCell className="font-medium">{customer.id}</TableCell>
+                    <TableCell className="font-medium">
+                      <Button variant="link" asChild className="p-0 h-auto text-primary hover:underline">
+                        <Link href={`/admin/customers/view/${customer.id}`}>
+                          {customer.id}
+                        </Link>
+                      </Button>
+                    </TableCell>
                     <TableCell>{customer.name}</TableCell>
                     <TableCell>{customer.email}</TableCell>
                     <TableCell>{customer.phone || 'N/A'}</TableCell>
                     <TableCell>{format(new Date(customer.customerSince), 'PPP')}</TableCell>
                     <TableCell className="text-center space-x-2">
+                      <Button variant="outline" size="sm" title="View Customer" asChild>
+                        <Link href={`/admin/customers/view/${customer.id}`}>
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">View</span>
+                        </Link>
+                      </Button>
                       <Button variant="outline" size="sm" title="Edit Customer" asChild>
                         <Link href={`/admin/customers/edit/${customer.id}`}>
                           <Pencil className="h-4 w-4" />
