@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,7 +11,8 @@ import QrCodeDisplay from '@/components/QrCodeDisplay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Leaf, Loader2, X } from 'lucide-react';
+import Link from 'next/link';
+import { Leaf, Loader2, X, UserCog } from 'lucide-react';
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -44,12 +46,19 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-        <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
+        <div className="container flex h-16 items-center justify-between space-x-4">
           <div className="flex items-center gap-2 text-2xl font-bold text-primary">
             <Leaf className="h-7 w-7" />
             <span>HealthStore Central</span>
           </div>
-          {/* Navigation items can go here */}
+          <nav>
+            <Button variant="outline" asChild>
+              <Link href="/admin/products">
+                <UserCog className="mr-2 h-4 w-4" />
+                Admin Panel
+              </Link>
+            </Button>
+          </nav>
         </div>
       </header>
 
