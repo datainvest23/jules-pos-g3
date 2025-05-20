@@ -103,12 +103,12 @@ export default function ProductManagementPage() {
                     </TableCell>
                     <TableCell className="text-right">{product.stock}</TableCell>
                     <TableCell className="text-center space-x-2">
-                      <Link href={`/admin/products/edit/${product.id}`} passHref>
-                        <Button variant="outline" size="sm" title="Edit Product">
+                      <Button variant="outline" size="sm" title="Edit Product" asChild>
+                        <Link href={`/admin/products/edit/${product.id}`}>
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
                       <Button variant="destructive" size="sm" onClick={() => console.log(`Delete ${product.id}`)} title="Delete Product">
                         <Trash2 className="h-4 w-4" />
                          <span className="sr-only">Delete</span>
