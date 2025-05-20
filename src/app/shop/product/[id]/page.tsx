@@ -10,9 +10,10 @@ import type { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ArrowLeft, ShoppingCart, Info, Tag, DollarSign, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, ArrowLeft, ShoppingCart, Info, Tag, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'; // Removed DollarSign
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import AppNavigation from '@/components/AppNavigation'; // Added
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -81,7 +82,18 @@ export default function ProductDetailPage() {
   if (error || !product) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md text-center shadow-lg">
+         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm mb-auto">
+            <div className="container flex h-16 items-center">
+                <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary mr-6">
+                    <ShoppingCart className="h-7 w-7" />
+                    <span>HealthStore</span>
+                </Link>
+                <div className="flex-grow">
+                    <AppNavigation />
+                </div>
+            </div>
+        </header>
+        <Card className="w-full max-w-md text-center shadow-lg my-auto">
           <CardHeader>
             <CardTitle className="text-2xl text-destructive flex items-center justify-center">
               <AlertTriangle className="mr-2 h-7 w-7" /> Product Not Found
@@ -96,6 +108,13 @@ export default function ProductDetailPage() {
             </Button>
           </CardContent>
         </Card>
+         <footer className="py-6 md:px-8 md:py-0 border-t bg-background mt-auto w-full">
+            <div className="container flex flex-col items-center justify-between gap-4 md:h-20 md:flex-row">
+            <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+                &copy; {new Date().getFullYear()} HealthStore Central.
+            </p>
+            </div>
+        </footer>
       </div>
     );
   }
@@ -103,14 +122,14 @@ export default function ProductDetailPage() {
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-        <div className="container flex h-16 items-center justify-between space-x-4">
-          <Link href="/shop" className="flex items-center gap-2 text-2xl font-bold text-primary">
-            <ShoppingCart className="h-7 w-7" />
-            <span>HealthStore Shop</span>
-          </Link>
-          <Button variant="outline" asChild>
-            <Link href="/">POS View</Link>
-          </Button>
+        <div className="container flex h-16 items-center">
+            <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary mr-6">
+                <ShoppingCart className="h-7 w-7" />
+                <span>HealthStore</span>
+            </Link>
+            <div className="flex-grow">
+                <AppNavigation />
+            </div>
         </div>
       </header>
 
@@ -171,7 +190,6 @@ export default function ProductDetailPage() {
                 
                  <Separator className="my-4" />
 
-                {/* Placeholder for future details like ingredients, reviews etc. */}
                  <div className="text-sm text-muted-foreground">
                     <p><Tag className="inline mr-1 h-4 w-4" />Category: {product.category}</p>
                     {product.supplierId && <p className="mt-1"><ShoppingCart className="inline mr-1 h-4 w-4" />Supplier ID: {product.supplierId}</p>}
@@ -201,12 +219,11 @@ export default function ProductDetailPage() {
             &copy; {new Date().getFullYear()} HealthStore Central.
           </p>
           <nav className="flex gap-4">
-            <Link href="#" className="text-sm hover:text-primary transition-colors">Terms</Link>
-            <Link href="#" className="text-sm hover:text-primary transition-colors">Privacy</Link>
+            <Link href="/contact#terms" className="text-sm hover:text-primary transition-colors">Terms</Link>
+            <Link href="/contact#privacy" className="text-sm hover:text-primary transition-colors">Privacy</Link>
           </nav>
         </div>
       </footer>
     </div>
   );
 }
-

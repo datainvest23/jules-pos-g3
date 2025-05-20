@@ -5,18 +5,19 @@ import { useState, useEffect, useMemo } from 'react';
 import type { Product } from '@/types';
 import { fetchAllProducts } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
-import { Loader2, ShoppingBag, Filter, ArrowLeft } from 'lucide-react'; // Added ArrowLeft
+import AppNavigation from '@/components/AppNavigation'; // Added
+import { Loader2, ShoppingBag, Filter, ArrowLeft, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation'; // Added useRouter
+import { useRouter } from 'next/navigation'; 
 
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { toast } = useToast();
-  const router = useRouter(); // Initialize router
+  const router = useRouter(); 
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -54,17 +55,15 @@ export default function ShopPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-        <div className="container flex h-16 items-center justify-between space-x-4">
-          <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
+        <div className="container flex h-16 items-center">
+          <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary mr-6">
             <ShoppingBag className="h-7 w-7" />
-            <span>HealthStore Shop</span>
+            <span>HealthStore</span>
           </Link>
-          <nav className="flex items-center space-x-4">
-            <Button variant="outline" asChild>
-              <Link href="/"> <ArrowLeft className="mr-2 h-4 w-4"/> Back to POS</Link>
-            </Button>
-            {/* Future: Add cart icon, user login/profile */}
-          </nav>
+          <div className="flex-grow">
+            <AppNavigation />
+          </div>
+          {/* Future: Add cart icon, user login/profile in the space below or adjust AppNavigation for more links */}
         </div>
       </header>
 
@@ -103,7 +102,6 @@ export default function ShopPage() {
                 key={product.id} 
                 product={product} 
                 onSelectProduct={handleSelectProductForShop} 
-                // onAddToCart is omitted as this is a browse-only catalog
               />
             ))}
           </div>
@@ -120,12 +118,12 @@ export default function ShopPage() {
             &copy; {new Date().getFullYear()} HealthStore Central.
           </p>
           <nav className="flex gap-4">
-            <Link href="/shop/terms" className="text-sm hover:text-primary transition-colors">Terms of Service</Link>
-            <Link href="/shop/privacy" className="text-sm hover:text-primary transition-colors">Privacy Policy</Link>
+            {/* Example footer links, can be expanded */}
+            <Link href="/contact#terms" className="text-sm hover:text-primary transition-colors">Terms of Service</Link>
+            <Link href="/contact#privacy" className="text-sm hover:text-primary transition-colors">Privacy Policy</Link>
           </nav>
         </div>
       </footer>
     </div>
   );
 }
-

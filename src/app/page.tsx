@@ -10,12 +10,13 @@ import ProductSuggester from '@/components/ProductSuggester';
 import QrCodeDisplay from '@/components/QrCodeDisplay';
 import ReceiptDialog from '@/components/ReceiptDialog';
 import CurrentSalePanel from '@/components/CurrentSalePanel';
+import AppNavigation from '@/components/AppNavigation'; // Added
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Leaf, Loader2, X, UserCog, ShoppingCart, ShieldCheck, Store, Filter, ShoppingBag } from 'lucide-react'; // Added ShoppingBag
+import { Leaf, Loader2, X, UserCog, ShoppingCart, ShieldCheck, Store, Filter } from 'lucide-react';
 import { useMode } from '@/context/ModeContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -191,17 +192,17 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-        <div className="container flex h-16 items-center justify-between space-x-4">
-          <div className="flex items-center gap-2 text-2xl font-bold text-primary">
+        <div className="container flex h-16 items-center">
+          <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary mr-6">
             <Leaf className="h-7 w-7" />
-            <span>HealthStore Central</span>
+            <span>HealthStore</span>
+          </Link>
+          
+          <div className="flex-grow">
+            <AppNavigation />
           </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" asChild>
-                <Link href="/shop">
-                    <ShoppingBag className="mr-2 h-4 w-4" /> Online Shop
-                </Link>
-            </Button>
+
+          <div className="flex items-center space-x-3 ml-auto">
             <div className="flex items-center space-x-2">
               <Store className={`h-5 w-5 ${mode === 'cashier' ? 'text-primary' : 'text-muted-foreground'}`} />
               <Switch
@@ -216,7 +217,7 @@ export default function HomePage() {
               </Label>
             </div>
             {mode === 'admin' && (
-              <Button variant="outline" asChild onClick={handleAdminNavigation}>
+              <Button variant="outline" size="sm" asChild onClick={handleAdminNavigation}>
                 <Link href="/admin">
                   <UserCog className="mr-2 h-4 w-4" />
                   Admin Panel
