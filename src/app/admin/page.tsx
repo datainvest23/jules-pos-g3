@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, ShoppingCart, Users, BarChart3, Truck, Loader2, AlertTriangle, Package, Zap } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, BarChart3, Truck, Loader2, AlertTriangle, Package, Zap, BarChartBig } from "lucide-react";
 import Link from "next/link";
 import { fetchAllProducts, fetchAllCustomers, fetchAllSuppliers } from '@/lib/api';
 
@@ -185,6 +185,24 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Sales Intelligence
+                </CardTitle>
+                <BarChartBig className="h-5 w-5 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">BI Dashboard</div>
+                <p className="text-xs text-muted-foreground">
+                  View sales trends and AI insights.
+                </p>
+                 <Link href="/admin/bi" className="text-sm text-primary hover:underline mt-2 block">
+                  Go to Sales Intelligence &rarr;
+                </Link>
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">

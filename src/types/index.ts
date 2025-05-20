@@ -78,7 +78,7 @@ export interface ProductSalesHistoryItem {
   saleAmount: number; // This will be simulated for now (product price * quantity)
 }
 
-// For AI Product Promotion Flow
+// For AI Product Promotion Flow (View Product Page)
 export interface GenerateProductPromotionInput {
   productId: string;
   productName: string;
@@ -86,11 +86,32 @@ export interface GenerateProductPromotionInput {
   productCategory: string;
   price: number;
   salePrice?: number | null;
-  imageUrl: string; // Will not be sent to LLM directly, but good to have for context
-  // Simplified sales history for the prompt
+  // imageUrl is not directly used by LLM but good for potential future context
   recentSalesSummary: Array<{ customerName: string | null, date: string, quantity: number }>;
 }
 
 export interface GenerateProductPromotionOutput {
   socialMediaPost: string;
 }
+
+// For AI Suggest Promotional Product Flow (BI Page)
+interface ProductSummaryForAISuggestion {
+    id: string;
+    name: string;
+    category: string;
+    price: number;
+    salePrice?: number | null;
+    stock: number;
+    optimumStock?: number | null;
+}
+export interface SuggestPromotionalProductInput {
+  products: ProductSummaryForAISuggestion[];
+  // We could add overall sales trends here if available later
+}
+
+export interface SuggestPromotionalProductOutput {
+  productId: string;
+  productName: string;
+  reason: string;
+}
+

@@ -1,7 +1,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Package2, LayoutDashboard, Settings, Users, ShoppingCart, Truck, Home } from 'lucide-react';
+import { Package2, LayoutDashboard, Settings, Users, ShoppingCart, Truck, Home, BarChartBig } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Admin - HealthStore Central',
@@ -31,6 +31,13 @@ export default function AdminLayout({
             <Home className="h-4 w-4" />
             Store Front / POS
           </Link>
+           <Link
+            href="/admin" // Main dashboard link
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Dashboard
+          </Link>
           <Link
             href="/admin/products"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted"
@@ -52,12 +59,12 @@ export default function AdminLayout({
             <Truck className="h-4 w-4" />
             Suppliers
           </Link>
-           <Link
-            href="/admin" // Main dashboard link
+          <Link
+            href="/admin/bi"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted"
           >
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
+            <BarChartBig className="h-4 w-4" />
+            Sales Intelligence
           </Link>
         </nav>
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
