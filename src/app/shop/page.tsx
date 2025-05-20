@@ -5,16 +5,18 @@ import { useState, useEffect, useMemo } from 'react';
 import type { Product } from '@/types';
 import { fetchAllProducts } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
-import { Loader2, ShoppingBag, Filter } from 'lucide-react';
+import { Loader2, ShoppingBag, Filter, ArrowLeft } from 'lucide-react'; // Added ArrowLeft
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation'; // Added useRouter
 
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { toast } = useToast();
+  const router = useRouter(); // Initialize router
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -33,10 +35,7 @@ export default function ShopPage() {
   }, [toast]);
 
   const handleSelectProductForShop = (product: Product) => {
-    // For now, clicking a product card in the shop will just log.
-    // Later, this will navigate to /shop/product/[id]
-    console.log("Selected product in shop:", product.name);
-    // router.push(`/shop/product/${product.id}`); // Example for future navigation
+    router.push(`/shop/product/${product.id}`);
   };
 
   const productCategories = useMemo(() => {
@@ -62,7 +61,7 @@ export default function ShopPage() {
           </Link>
           <nav className="flex items-center space-x-4">
             <Button variant="outline" asChild>
-              <Link href="/">POS View</Link>
+              <Link href="/"> <ArrowLeft className="mr-2 h-4 w-4"/> Back to POS</Link>
             </Button>
             {/* Future: Add cart icon, user login/profile */}
           </nav>
@@ -129,3 +128,4 @@ export default function ShopPage() {
     </div>
   );
 }
+
