@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string; // SKU or unique ID
   name: string;
@@ -6,7 +7,8 @@ export interface Product {
   price: number;
   salePrice?: number;
   imageUrl: string;
-  stock: number; 
+  stock: number;
+  supplierId?: string | null; // Optional: ID of the supplier
 }
 
 export interface SuggestedProduct {
@@ -35,4 +37,19 @@ export interface ReceiptData {
   transactionId: string;
   quantity: number;
   timestamp: Date;
+}
+
+export interface Supplier {
+  id: string; // Auto-generated or system ID
+  name: string;
+  contactPerson?: string | null;
+  email: string;
+  phone?: string | null;
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  } | null;
+  notes?: string | null; // Any other relevant information
 }

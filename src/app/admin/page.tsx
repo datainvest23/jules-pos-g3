@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LayoutDashboard, ShoppingCart, Users, BarChart3 } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, BarChart3, Truck } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminDashboardPage() {
@@ -49,6 +49,24 @@ export default function AdminDashboardPage() {
             </p>
              <Link href="/admin/customers" className="text-sm text-primary hover:underline mt-2 block">
               Go to Customers &rarr;
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Supplier Management
+            </CardTitle>
+            <Truck className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Suppliers</div>
+            <p className="text-xs text-muted-foreground">
+              Manage your product suppliers.
+            </p>
+             <Link href="/admin/suppliers" className="text-sm text-primary hover:underline mt-2 block">
+              Go to Suppliers &rarr;
             </Link>
           </CardContent>
         </Card>
