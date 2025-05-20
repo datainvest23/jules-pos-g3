@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge"; // Added import for Badge
 import { LayoutDashboard, ShoppingCart, Users, BarChart3, Truck, Loader2, AlertTriangle, Package, Zap, BarChartBig, ListChecks, Settings } from "lucide-react"; // Added ListChecks and Settings
 import Link from "next/link";
 import { fetchAllProducts, fetchAllCustomers, fetchAllSuppliers } from '@/lib/api';
