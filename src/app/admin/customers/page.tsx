@@ -91,9 +91,11 @@ export default function CustomerManagementPage() {
                     <TableCell>{customer.phone || 'N/A'}</TableCell>
                     <TableCell>{format(new Date(customer.customerSince), 'PPP')}</TableCell>
                     <TableCell className="text-center space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => console.log(`Edit ${customer.id}`)} title="Edit Customer">
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
+                      <Button variant="outline" size="sm" title="Edit Customer" asChild>
+                        <Link href={`/admin/customers/edit/${customer.id}`}>
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Link>
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => console.log(`Delete ${customer.id}`)} title="Delete Customer">
                         <Trash2 className="h-4 w-4" />
