@@ -1,5 +1,6 @@
-import type { Product, Customer } from '@/types';
-import { mockProducts, mockCustomers } from './mockData';
+
+import type { Product, Customer, Supplier } from '@/types';
+import { mockProducts, mockCustomers, mockSuppliers } from './mockData';
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -22,4 +23,14 @@ export async function fetchAllCustomers(): Promise<Customer[]> {
 export async function fetchCustomerById(id: string): Promise<Customer | undefined> {
   await delay(250); // Simulate network latency
   return mockCustomers.find(customer => customer.id === id);
+}
+
+export async function fetchAllSuppliers(): Promise<Supplier[]> {
+  await delay(350); // Simulate network latency
+  return mockSuppliers;
+}
+
+export async function fetchSupplierById(id: string): Promise<Supplier | undefined> {
+  await delay(200); // Simulate network latency
+  return mockSuppliers.find(supplier => supplier.id === id);
 }

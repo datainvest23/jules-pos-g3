@@ -1,4 +1,5 @@
-import type { Product, Customer } from '@/types';
+
+import type { Product, Customer, Supplier } from '@/types';
 
 export const mockProducts: Product[] = [
   {
@@ -9,6 +10,7 @@ export const mockProducts: Product[] = [
     price: 5.99,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "fruit organic"
     stock: 150,
+    supplierId: 'SUPP-001-HG',
   },
   {
     id: 'HS002',
@@ -19,6 +21,7 @@ export const mockProducts: Product[] = [
     salePrice: 10.99,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "supplement pill"
     stock: 80,
+    supplierId: 'SUPP-002-VN',
   },
   {
     id: 'HS003',
@@ -28,6 +31,7 @@ export const mockProducts: Product[] = [
     price: 29.99,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "fitness yoga"
     stock: 45,
+    supplierId: 'SUPP-003-ES',
   },
   {
     id: 'HS004',
@@ -37,6 +41,7 @@ export const mockProducts: Product[] = [
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "supplement powder"
     stock: 60,
+    supplierId: 'SUPP-001-HG',
   },
   {
     id: 'HS005',
@@ -46,6 +51,7 @@ export const mockProducts: Product[] = [
     price: 7.29,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "tea herb"
     stock: 120,
+    supplierId: 'SUPP-002-VN',
   },
   {
     id: 'HS006',
@@ -55,6 +61,7 @@ export const mockProducts: Product[] = [
     price: 24.95,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "supplement capsule"
     stock: 70,
+    supplierId: 'SUPP-001-HG',
   },
 ];
 
@@ -119,4 +126,44 @@ export const mockCustomers: Customer[] = [
     },
     customerSince: new Date('2023-10-31'),
   }
+];
+
+export const mockSuppliers: Supplier[] = [
+  {
+    id: 'SUPP-001-HG',
+    name: 'HealthGoods Inc.',
+    contactPerson: 'Sarah Miller',
+    email: 'sarah.miller@healthgoods.com',
+    phone: '555-0201',
+    address: {
+      street: '100 Wellness Way',
+      city: 'Nutriville',
+      state: 'CA',
+      zip: '90211',
+    },
+    notes: 'Primary supplier for organic foods and general supplements.',
+  },
+  {
+    id: 'SUPP-002-VN',
+    name: 'VitaNutrients Co.',
+    contactPerson: 'John Davis',
+    email: 'jdavis@vitanutrients.co',
+    phone: '555-0202',
+    address: {
+      street: '200 Vitamin Ave',
+      city: 'Supplement City',
+      state: 'NY',
+      zip: '10001',
+    },
+    notes: 'Specializes in high-potency vitamins and specialized supplements.',
+  },
+  {
+    id: 'SUPP-003-ES',
+    name: 'EcoSupplies Ltd.',
+    contactPerson: 'Linda Green',
+    email: 'linda.g@ecosupplies.net',
+    phone: '555-0203',
+    // No address for this supplier
+    notes: 'Supplier for eco-friendly wellness items and yoga gear.',
+  },
 ];
