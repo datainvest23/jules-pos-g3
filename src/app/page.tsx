@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Product, ReceiptData, Customer, CartItem } from '@/types';
 import { fetchAllProducts, fetchAllCustomers } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Leaf, Loader2, X, UserCog, ShoppingCart, ShieldCheck, Store } from 'lucide-react';
+import { Leaf, Loader2, X, UserCog, ShoppingCart, ShieldCheck, Store, Filter } from 'lucide-react';
 import { useMode } from '@/context/ModeContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -36,6 +36,7 @@ export default function HomePage() {
   const [selectedSaleCustomer, setSelectedSaleCustomer] = useState<Customer | null>(null);
 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -173,6 +174,20 @@ export default function HomePage() {
     setMode('admin'); 
   };
 
+  const productCategories = useMemo(() => {
+    if (!products || products.length === 0) return [];
+    const categories = new Set(products.map(p => p.category));
+    return ['All', ...Array.from(categories)];
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    if (!selectedCategory || selectedCategory === 'All') {
+      return products;
+    }
+    return products.filter(product => product.category === selectedCategory);
+  }, [products, selectedCategory]);
+
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
@@ -197,7 +212,7 @@ export default function HomePage() {
             </div>
             {mode === 'admin' && (
               <Button variant="outline" asChild onClick={handleAdminNavigation}>
-                <Link href="/admin/products">
+                <Link href="/admin">
                   <UserCog className="mr-2 h-4 w-4" />
                   Admin Panel
                 </Link>
@@ -240,6 +255,24 @@ export default function HomePage() {
               </div>
             )}
             
+             {/* Category Filters */}
+            {!isLoadingProducts && products.length > 0 && (
+              <div className="mb-8 flex flex-wrap gap-3 justify-center items-center">
+                <Filter className="h-5 w-5 text-muted-foreground mr-1 hidden sm:inline-block" />
+                {productCategories.map(category => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category || (selectedCategory === null && category === 'All') ? 'default' : 'outline'}
+                    onClick={() => setSelectedCategory(category === 'All' ? null : category)}
+                    size="sm"
+                    className="rounded-full px-4"
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+            )}
+
             <h2 className="text-3xl font-bold mb-6 text-foreground flex items-center">
               <Leaf className="w-7 h-7 mr-2 text-primary" /> Our Products
             </h2>
@@ -248,14 +281,16 @@ export default function HomePage() {
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 <p className="ml-3 text-lg text-muted-foreground">Loading products...</p>
               </div>
-            ) : products.length > 0 ? (
+            ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} onSelectProduct={handleSelectProduct} onAddToCart={mode === 'cashier' ? handleAddToCart : undefined}/>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground text-lg">No products available at the moment.</p>
+              <p className="text-center text-muted-foreground text-lg">
+                {selectedCategory && selectedCategory !== 'All' ? `No products found in the "${selectedCategory}" category.` : 'No products available at the moment.'}
+              </p>
             )}
           </section>
 
@@ -344,3 +379,4 @@ export default function HomePage() {
     </div>
   );
 }
+
