@@ -2,9 +2,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, ShoppingCart, Users, BarChart3, Truck, Loader2, AlertTriangle, Package, Zap, BarChartBig } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, BarChart3, Truck, Loader2, AlertTriangle, Package, Zap, BarChartBig, ListChecks, Settings } from "lucide-react"; // Added ListChecks and Settings
 import Link from "next/link";
 import { fetchAllProducts, fetchAllCustomers, fetchAllSuppliers } from '@/lib/api';
 
@@ -44,7 +44,7 @@ export default function AdminDashboardPage() {
     loadStats();
   }, []);
 
-  const StatCard: React.FC<{ title: string; value: string | number; icon: React.ElementType; description?: string, link?: string; linkText?: string }> = 
+  const StatCard: React.FC<{ title: string; value: string | number; icon: React.ElementType; description?: string, link?: string; linkText?: string }> =
     ({ title, value, icon: Icon, description, link, linkText }) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -63,16 +63,46 @@ export default function AdminDashboardPage() {
     </Card>
   );
 
+  const NavCard: React.FC<{ title: string; description: string; icon: React.ElementType; link: string; count?: number | string; countLabel?: string, comingSoon?: boolean }> =
+    ({ title, description, icon: Icon, link, count, countLabel, comingSoon }) => (
+    <Link href={link} className={`block rounded-lg ${comingSoon ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-lg transition-shadow'}`}>
+        <Card className="h-full flex flex-col">
+        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
+            <div className="space-y-1">
+            <CardTitle className="text-lg font-semibold flex items-center">
+                <Icon className="w-6 h-6 mr-3 text-primary" />
+                {title}
+            </CardTitle>
+            {count !== undefined && countLabel && (
+                <p className="text-xs text-muted-foreground">
+                {count} {countLabel}
+                </p>
+            )}
+            </div>
+            {comingSoon && <Badge variant="outline">Soon</Badge>}
+        </CardHeader>
+        <CardContent className="flex-grow">
+            <p className="text-sm text-muted-foreground">{description}</p>
+        </CardContent>
+        <CardFooter className="pt-3">
+             <Button variant="outline" className="w-full" disabled={comingSoon}>
+                {comingSoon ? 'Coming Soon' : `Go to ${title}`}
+             </Button>
+        </CardFooter>
+        </Card>
+    </Link>
+  );
+
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-10">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight flex items-center">
           <LayoutDashboard className="w-8 h-8 mr-3 text-primary" />
           Admin Dashboard
         </h2>
-        {/* Optional: Add a refresh button or other global actions here */}
       </div>
-      
+
       {isLoading && (
         <div className="flex justify-center items-center py-10">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -103,126 +133,81 @@ export default function AdminDashboardPage() {
             <StatCard title="Today's Sales" value="$0.00" icon={BarChart3} description="Simulated - Feature coming soon" />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-            <Card className="col-span-1 lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Zap className="w-6 h-6 mr-2 text-primary"/>
-                  Quick Actions
-                </CardTitle>
-                <CardDescription>Quickly jump to common tasks.</CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button asChild variant="outline">
-                  <Link href="/">Start New Sale</Link>
-                </Button>
-                 <Button asChild variant="outline">
-                  <Link href="/admin/products/new">Add New Product</Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link href="/admin/customers/new">Add New Customer</Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link href="/admin/suppliers/new">Add New Supplier</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="col-span-1 lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Zap className="w-6 h-6 mr-2 text-primary"/>
+                Quick Actions
+              </CardTitle>
+              <CardDescription>Quickly jump to common tasks.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Button asChild variant="outline">
+                <Link href="/">Start New Sale (POS)</Link>
+              </Button>
+               <Button asChild variant="outline">
+                <Link href="/admin/products/new">Add New Product</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/admin/customers/new">Add New Customer</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/admin/suppliers/new">Add New Supplier</Link>
+              </Button>
+            </CardContent>
+          </Card>
 
           <h3 className="text-2xl font-semibold tracking-tight pt-4">Management Sections</h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Product Management
-                </CardTitle>
-                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">Products</div>
-                <p className="text-xs text-muted-foreground">
-                  Manage all {stats.productCount} products. Add, edit, and organize inventory.
-                </p>
-                <Link href="/admin/products" className="text-sm text-primary hover:underline mt-2 block">
-                  Go to Products &rarr;
-                </Link>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Customer Management
-                </CardTitle>
-                <Users className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">Customers</div>
-                <p className="text-xs text-muted-foreground">
-                  View and manage data for {stats.customerCount} customers.
-                </p>
-                 <Link href="/admin/customers" className="text-sm text-primary hover:underline mt-2 block">
-                  Go to Customers &rarr;
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Supplier Management
-                </CardTitle>
-                <Truck className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">Suppliers</div>
-                <p className="text-xs text-muted-foreground">
-                  Oversee information for {stats.supplierCount} suppliers.
-                </p>
-                 <Link href="/admin/suppliers" className="text-sm text-primary hover:underline mt-2 block">
-                  Go to Suppliers &rarr;
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Sales Intelligence
-                </CardTitle>
-                <BarChartBig className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">BI Dashboard</div>
-                <p className="text-xs text-muted-foreground">
-                  View sales trends and AI insights.
-                </p>
-                 <Link href="/admin/bi" className="text-sm text-primary hover:underline mt-2 block">
-                  Go to Sales Intelligence &rarr;
-                </Link>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Sales Reports
-                </CardTitle>
-                <BarChart3 className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">Reports</div>
-                <p className="text-xs text-muted-foreground">
-                  Analyze sales and performance. (Coming Soon)
-                </p>
-                <Link href="#" className="text-sm text-primary hover:underline mt-2 block opacity-50 cursor-not-allowed">
-                  View Reports (Soon)
-                </Link>
-              </CardContent>
-            </Card>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <NavCard
+              title="Products"
+              description="Manage all products. Add, edit, view details, and organize inventory."
+              icon={ListChecks}
+              link="/admin/products"
+              count={stats.productCount}
+              countLabel="products"
+            />
+            <NavCard
+              title="Customers"
+              description="View and manage data for all customers. Access profiles and purchase history."
+              icon={Users}
+              link="/admin/customers"
+              count={stats.customerCount}
+              countLabel="customers"
+            />
+            <NavCard
+              title="Suppliers"
+              description="Oversee information for product suppliers. Add new suppliers and manage contacts."
+              icon={Truck}
+              link="/admin/suppliers"
+              count={stats.supplierCount}
+              countLabel="suppliers"
+            />
+            <NavCard
+              title="Sales Intelligence"
+              description="View sales trends, top customer insights, and AI-powered promotion suggestions."
+              icon={BarChartBig}
+              link="/admin/bi"
+            />
+            <NavCard
+              title="Sales Reports"
+              description="Analyze sales performance, track revenue, and generate detailed reports."
+              icon={BarChart3}
+              link="#" 
+              comingSoon
+            />
+             <NavCard
+              title="Settings"
+              description="Configure application settings, user roles, and integrations."
+              icon={Settings}
+              link="#"
+              comingSoon
+            />
           </div>
         </>
       )}
     </div>
   );
 }
+
+    
