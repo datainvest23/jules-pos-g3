@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Customer Management (Soon)
+              Customer Management
             </CardTitle>
             <Users className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -47,9 +47,9 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">
               View and manage customer data.
             </p>
-             <p className="text-sm text-muted-foreground mt-2 block">
-              Coming Soon
-            </p>
+             <Link href="/admin/customers" className="text-sm text-primary hover:underline mt-2 block">
+              Go to Customers &rarr;
+            </Link>
           </CardContent>
         </Card>
 

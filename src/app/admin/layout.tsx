@@ -32,11 +32,11 @@ export default function AdminLayout({
             Products
           </Link>
           <Link
-            href="#"
+            href="/admin/customers"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted"
           >
             <Users className="h-4 w-4" />
-            Customers (Soon)
+            Customers
           </Link>
            <Link
             href="#"
