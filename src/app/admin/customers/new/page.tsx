@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
@@ -28,7 +29,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, UserPlus, CalendarIcon } from 'lucide-react';
+import { ArrowLeft, UserPlus, CalendarIcon, Star, DollarSign } from 'lucide-react';
 
 const customerFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters.").max(100, "Name must be 100 characters or less."),
@@ -39,6 +40,8 @@ const customerFormSchema = z.object({
   addressState: z.string().max(50, "State must be 50 characters or less.").optional().nullable(),
   addressZip: z.string().max(20, "ZIP code must be 20 characters or less.").optional().nullable(),
   customerSince: z.date({ required_error: "Customer since date is required."}),
+  isVip: z.boolean().optional(),
+  storeCredit: z.coerce.number({invalid_type_error: "Store credit must be a number."}).nonnegative("Store credit cannot be negative.").optional().nullable(),
 });
 
 export type CustomerFormValues = z.infer<typeof customerFormSchema>;
@@ -62,6 +65,8 @@ export default function AddNewCustomerPage() {
       addressState: null,
       addressZip: null,
       customerSince: new Date(),
+      isVip: false,
+      storeCredit: 0,
     },
   });
 
@@ -79,6 +84,8 @@ export default function AddNewCustomerPage() {
         zip: data.addressZip,
       } : null,
       customerSince: data.customerSince,
+      isVip: data.isVip,
+      storeCredit: data.storeCredit,
     };
 
     // TODO: Implement actual customer creation logic (e.g., API call to save customer)
@@ -209,6 +216,59 @@ export default function AddNewCustomerPage() {
                   )}
                 />
               </div>
+
+              <Card className="p-4 pt-2 bg-muted/30">
+                <CardHeader className="p-2">
+                    <CardTitle className="text-lg">Membership Details</CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 space-y-4">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                     <FormField
+                        control={form.control}
+                        name="isVip"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-3 shadow-sm h-10">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel className="flex items-center">
+                                <Star className="mr-2 h-4 w-4 text-yellow-500" />
+                                VIP Customer
+                              </FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="storeCredit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center">
+                              <DollarSign className="mr-2 h-4 w-4 text-green-600" />
+                              Store Credit ($)
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="e.g., 10.00"
+                                {...field}
+                                onChange={event => field.onChange(event.target.value === '' ? null : +event.target.value)}
+                                value={field.value ?? ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                   </div>
+                </CardContent>
+              </Card>
               
               <Card className="p-4 pt-2 bg-muted/30">
                 <CardHeader className="p-2">

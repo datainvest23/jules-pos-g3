@@ -88,7 +88,9 @@ export const mockCustomers: Customer[] = [
       { transactionId: 'TXN-ALC-001', timestamp: new Date('2023-07-10T10:30:00Z'), totalAmount: 25.99 },
       { transactionId: 'TXN-ALC-002', timestamp: new Date('2023-08-15T14:15:00Z'), totalAmount: 12.49 },
       { transactionId: 'TXN-ALC-003', timestamp: new Date('2023-09-01T09:00:00Z'), totalAmount: 35.00 },
-    ]
+    ],
+    isVip: true,
+    storeCredit: 10.75,
   },
   {
     id: 'CUST-002-CD',
@@ -104,7 +106,9 @@ export const mockCustomers: Customer[] = [
     customerSince: new Date('2022-11-30'),
     purchaseHistory: [
       { transactionId: 'TXN-BOB-001', timestamp: new Date('2023-06-20T11:00:00Z'), totalAmount: 29.99 },
-    ]
+    ],
+    isVip: false,
+    storeCredit: 0,
   },
   {
     id: 'CUST-003-EF',
@@ -113,7 +117,9 @@ export const mockCustomers: Customer[] = [
     phone: '555-0103',
     // No address for Charlie
     customerSince: new Date('2023-05-20'),
-    purchaseHistory: [] // Empty history
+    purchaseHistory: [], // Empty history
+    isVip: false,
+    storeCredit: 5.00,
   },
   {
     id: 'CUST-004-GH',
@@ -128,6 +134,8 @@ export const mockCustomers: Customer[] = [
     },
     customerSince: new Date('2021-07-04'),
     // Undefined purchaseHistory
+    isVip: true,
+    storeCredit: 25.00,
   },
   {
     id: 'CUST-005-IJ',
@@ -144,7 +152,9 @@ export const mockCustomers: Customer[] = [
     purchaseHistory: [
         { transactionId: 'TXN-EDW-001', timestamp: new Date('2023-11-01T12:00:00Z'), totalAmount: 18.28 }, // 5.99 + 12.29
         { transactionId: 'TXN-EDW-002', timestamp: new Date('2023-11-05T16:45:00Z'), totalAmount: 7.29 },
-    ]
+    ],
+    isVip: false,
+    storeCredit: 0.00,
   }
 ];
 

@@ -9,7 +9,8 @@ import { format } from "date-fns";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, User, CalendarIcon, Loader2, Receipt, Eye, Info, Brain, Building, Mail, Phone, MapPin, Pencil } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, User, CalendarIcon, Loader2, Receipt, Eye, Info, Brain, Building, Mail, Phone, MapPin, Pencil, Star, DollarSign } from 'lucide-react';
 import { fetchCustomerById, fetchAllProducts } from '@/lib/api';
 import type { Customer, TransactionSummary, ReceiptData, Product, CartItem } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table';
@@ -205,17 +206,21 @@ export default function ViewCustomerPage() {
     return <p>No customer data available.</p>;
   }
 
-  const DetailItem: React.FC<{ icon: React.ElementType, label: string, value?: string | null | Date }> = ({ icon: Icon, label, value }) => {
-    let displayValue = 'N/A';
-    if (value instanceof Date) {
+  const DetailItem: React.FC<{ icon?: React.ElementType, label: string, value?: string | number | null | Date, children?: React.ReactNode }> = ({ icon: Icon, label, value, children }) => {
+    let displayValue: React.ReactNode = 'N/A';
+    if (children) {
+        displayValue = children;
+    } else if (value instanceof Date) {
         displayValue = format(value, "PPP");
-    } else if (value) {
-        displayValue = value;
+    } else if (typeof value === 'number' && (label.toLowerCase().includes('credit') || label.toLowerCase().includes('amount'))) {
+        displayValue = `$${value.toFixed(2)}`;
+    } else if (value !== null && value !== undefined) {
+        displayValue = String(value);
     }
-
+  
     return (
         <div className="flex items-start space-x-3">
-            <Icon className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+            {Icon && <Icon className="h-5 w-5 text-primary mt-1 flex-shrink-0" />}
             <div>
                 <p className="text-sm text-muted-foreground">{label}</p>
                 <p className="font-medium text-foreground">{displayValue}</p>
@@ -254,6 +259,17 @@ export default function ViewCustomerPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <DetailItem icon={Mail} label="Email Address" value={customerData.email} />
                 <DetailItem icon={Phone} label="Phone Number" value={customerData.phone} />
+            </div>
+            <Separator/>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <DetailItem icon={Star} label="VIP Status">
+                    {customerData.isVip ? (
+                        <Badge variant="default" className="bg-yellow-500 text-white">VIP Member</Badge>
+                    ) : (
+                        <Badge variant="outline">Standard</Badge>
+                    )}
+                </DetailItem>
+                <DetailItem icon={DollarSign} label="Store Credit" value={customerData.storeCredit ?? 0} />
             </div>
             <Separator />
              <div>
@@ -383,6 +399,3 @@ export default function ViewCustomerPage() {
     </div>
   );
 }
-
-
-    

@@ -37,6 +37,8 @@ export interface Customer {
   } | null;
   customerSince: Date;
   purchaseHistory?: TransactionSummary[];
+  isVip?: boolean;
+  storeCredit?: number;
 }
 
 export interface CartItem {
@@ -114,4 +116,3 @@ export interface SuggestPromotionalProductOutput {
   productName: string;
   reason: string;
 }
-
