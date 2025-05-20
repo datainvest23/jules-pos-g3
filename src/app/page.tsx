@@ -10,13 +10,13 @@ import ProductSuggester from '@/components/ProductSuggester';
 import QrCodeDisplay from '@/components/QrCodeDisplay';
 import ReceiptDialog from '@/components/ReceiptDialog';
 import CurrentSalePanel from '@/components/CurrentSalePanel';
-import AppNavigation from '@/components/AppNavigation'; // Added
+import AppNavigation from '@/components/AppNavigation'; 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Leaf, Loader2, X, UserCog, ShoppingCart, ShieldCheck, Store, Filter } from 'lucide-react';
+import { Leaf, Loader2, X, UserCog, ShoppingCart, ShieldCheck, Store, Filter, Building, UserCheck, Users } from 'lucide-react'; // Added Building, UserCheck, Users
 import { useMode } from '@/context/ModeContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -38,6 +38,8 @@ export default function HomePage() {
 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const [showLandingOverlay, setShowLandingOverlay] = useState(true);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -101,7 +103,6 @@ export default function HomePage() {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find(item => item.product.id === productToAdd.id);
       if (existingItem) {
-        // Check if adding another exceeds stock
         if (existingItem.quantity + 1 > productToAdd.stock) {
              toast({
                 title: "Stock Limit Reached",
@@ -116,7 +117,6 @@ export default function HomePage() {
             : item
         );
       } else {
-         // Check if adding the first item exceeds stock (should not happen if stock > 0 check passed initially)
         if (1 > productToAdd.stock) {
             toast({
                 title: "Stock Limit Reached",
@@ -164,7 +164,7 @@ export default function HomePage() {
   
   const handleClearCart = useCallback(() => {
     setCartItems([]);
-    setSelectedSaleCustomer(null); // Also clear selected customer
+    setSelectedSaleCustomer(null);
     toast({
       title: "Sale Cleared",
       description: "All items have been removed from the current sale.",
@@ -187,6 +187,66 @@ export default function HomePage() {
     }
     return products.filter(product => product.category === selectedCategory);
   }, [products, selectedCategory]);
+
+
+  if (showLandingOverlay) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+        <Card className="w-full max-w-lg shadow-2xl">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4">
+              <Leaf className="h-16 w-16 text-primary" />
+            </div>
+            <CardTitle className="text-3xl font-bold">Welcome to HealthStore Central</CardTitle>
+            <CardDescription className="text-md text-muted-foreground pt-1">
+              Please select your preferred view to get started.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-2 pb-6 px-6">
+            <Button
+              onClick={() => {
+                handleAdminNavigation(); // Ensure mode is set to admin
+                setShowLandingOverlay(false); 
+                // Navigation is handled by Link component
+              }}
+              className="w-full text-lg py-6"
+              asChild
+              size="lg"
+            >
+              <Link href="/admin">
+                <Building className="mr-2 h-5 w-5" /> Admin View
+              </Link>
+            </Button>
+            <Button
+              onClick={() => {
+                setMode('cashier'); // Ensure mode is set to cashier
+                setShowLandingOverlay(false);
+              }}
+              className="w-full text-lg py-6"
+              variant="outline"
+              size="lg"
+            >
+              <UserCheck className="mr-2 h-5 w-5" /> Cashier View
+            </Button>
+            <Button
+              onClick={() => { 
+                setShowLandingOverlay(false); 
+                // Navigation is handled by Link component
+              }}
+              className="w-full text-lg py-6"
+              variant="outline"
+              asChild
+              size="lg"
+            >
+              <Link href="/shop">
+                <Users className="mr-2 h-5 w-5" /> Client (Shop)
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
 
   return (
@@ -261,7 +321,6 @@ export default function HomePage() {
               </div>
             )}
             
-             {/* Category Filters */}
             {!isLoadingProducts && products.length > 0 && (
               <div className="mb-8 flex flex-wrap gap-3 justify-center items-center">
                 <Filter className="h-5 w-5 text-muted-foreground mr-1 hidden sm:inline-block" />
@@ -379,7 +438,7 @@ export default function HomePage() {
         isOpen={isReceiptDialogOpen} 
         onClose={() => {
           setIsReceiptDialogOpen(false);
-          if (receiptData) { // If receipt was shown, clear cart for next sale
+          if (receiptData) { 
               handleClearCart();
           }
         }} 
@@ -387,4 +446,3 @@ export default function HomePage() {
       />
     </div>
   );
-}
