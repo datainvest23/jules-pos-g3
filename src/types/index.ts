@@ -38,6 +38,8 @@ export interface ReceiptData {
   transactionId: string;
   quantity: number;
   timestamp: Date;
+  customerId?: string | null;
+  customerName?: string | null;
 }
 
 export interface Supplier {

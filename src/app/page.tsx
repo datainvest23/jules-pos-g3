@@ -2,13 +2,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Product, ReceiptData } from '@/types';
-import { fetchAllProducts } from '@/lib/api';
+import type { Product, ReceiptData, Customer } from '@/types';
+import { fetchAllProducts, fetchAllCustomers } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
 import PriceViewer from '@/components/PriceViewer';
 import ProductSuggester from '@/components/ProductSuggester';
 import QrCodeDisplay from '@/components/QrCodeDisplay';
 import ReceiptDialog from '@/components/ReceiptDialog';
+import CurrentSalePanel from '@/components/CurrentSalePanel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,10 @@ export default function HomePage() {
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
   const { mode, toggleMode, setMode } = useMode();
 
+  const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
+  const [isLoadingAllCustomers, setIsLoadingAllCustomers] = useState(true);
+  const [selectedSaleCustomer, setSelectedSaleCustomer] = useState<Customer | null>(null);
+
   useEffect(() => {
     const loadProducts = async () => {
       setIsLoadingProducts(true);
@@ -40,6 +45,19 @@ export default function HomePage() {
       }
     };
     loadProducts();
+
+    const loadCustomers = async () => {
+      setIsLoadingAllCustomers(true);
+      try {
+        const fetchedCustomers = await fetchAllCustomers();
+        setAllCustomers(fetchedCustomers);
+      } catch (error) {
+        console.error("Failed to fetch customers:", error);
+      } finally {
+        setIsLoadingAllCustomers(false);
+      }
+    };
+    loadCustomers();
   }, []);
 
   const handleSelectProduct = (product: Product) => {
@@ -71,13 +89,15 @@ export default function HomePage() {
       transactionId: `TXN-${Date.now().toString().slice(-8)}`,
       quantity: 1,
       timestamp: new Date(),
+      customerId: selectedSaleCustomer?.id || null,
+      customerName: selectedSaleCustomer?.name || null,
     };
     setReceiptData(newReceiptData);
     setIsReceiptDialogOpen(true);
   };
 
   const handleAdminNavigation = () => {
-    setMode('admin'); // Explicitly set mode to admin when navigating to admin panel
+    setMode('admin'); 
   };
 
   return (
@@ -116,10 +136,18 @@ export default function HomePage() {
 
       <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8">
         {mode === 'cashier' ? (
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-semibold text-foreground">Cashier Point of Sale</h1>
-            <p className="text-muted-foreground">Select products to add to sale.</p>
-          </div>
+          <>
+            <div className="mb-6 text-center">
+              <h1 className="text-2xl font-semibold text-foreground">Cashier Point of Sale</h1>
+              <p className="text-muted-foreground">Select products to add to sale.</p>
+            </div>
+            <CurrentSalePanel
+              selectedCustomer={selectedSaleCustomer}
+              onSelectCustomer={setSelectedSaleCustomer}
+              customers={allCustomers}
+              isLoadingCustomers={isLoadingAllCustomers}
+            />
+          </>
         ) : (
            <div className="mb-6 text-center">
             <h1 className="text-2xl font-semibold text-foreground">Product Catalog (Admin View)</h1>
@@ -129,7 +157,7 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           <section className={`transition-all duration-300 ease-in-out ${selectedProduct ? 'lg:col-span-8' : 'lg:col-span-12'}`}>
-            {mode === 'cashier' && (
+            {mode === 'cashier' && !selectedProduct && ( // Show price viewer only if no product is selected for details
               <div className="mb-6">
                  <PriceViewer />
               </div>
@@ -199,26 +227,16 @@ export default function HomePage() {
                       </p>
                     )}
                   </div>
-                  {mode === 'cashier' && (
-                    <Button 
-                      onClick={() => handleBuyNow(selectedProduct)} 
-                      className="w-full mt-4"
-                      disabled={selectedProduct.stock === 0}
-                    >
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      Add to Sale
-                    </Button>
-                  )}
-                  {mode === 'admin' && (
-                     <Button 
-                      onClick={() => handleBuyNow(selectedProduct)} 
-                      className="w-full mt-4"
-                      disabled={selectedProduct.stock === 0}
-                    >
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      Simulate Purchase
-                    </Button>
-                  )}
+                  
+                  <Button 
+                    onClick={() => handleBuyNow(selectedProduct)} 
+                    className="w-full mt-4"
+                    disabled={selectedProduct.stock === 0}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    {mode === 'cashier' ? 'Add to Sale' : 'Simulate Purchase'}
+                  </Button>
+                  
                   <ProductSuggester product={selectedProduct} />
                   <QrCodeDisplay productId={selectedProduct.id} productName={selectedProduct.name} />
                 </CardContent>

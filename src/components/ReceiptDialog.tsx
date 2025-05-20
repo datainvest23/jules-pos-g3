@@ -13,7 +13,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Printer, X } from 'lucide-react';
+import { Printer, X, User } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface ReceiptDialogProps {
@@ -27,7 +27,7 @@ export default function ReceiptDialog({ isOpen, onClose, receiptData }: ReceiptD
     return null;
   }
 
-  const { product, transactionId, quantity, timestamp } = receiptData;
+  const { product, transactionId, quantity, timestamp, customerName } = receiptData;
   const itemPrice = product.salePrice ?? product.price;
   const totalAmount = itemPrice * quantity;
 
@@ -51,6 +51,13 @@ export default function ReceiptDialog({ isOpen, onClose, receiptData }: ReceiptD
           <div className="text-sm text-muted-foreground">
             Date: {format(timestamp, "PPP p")}
           </div>
+
+          {customerName && (
+            <div className="text-sm text-muted-foreground flex items-center">
+              <User className="mr-2 h-4 w-4" />
+              Customer: <span className="font-medium ml-1">{customerName}</span>
+            </div>
+          )}
           
           <Separator />
 
