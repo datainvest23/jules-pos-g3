@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Product } from '@/types';
@@ -15,6 +16,16 @@ interface ProductCardProps {
 export default function ProductCard({ product, onSelectProduct }: ProductCardProps) {
   const displayPrice = product.salePrice ?? product.price;
   const originalPrice = product.salePrice ? product.price : null;
+
+  const getStockBadge = () => {
+    if (product.stock === 0) {
+      return <Badge variant="destructive">Out of Stock</Badge>;
+    }
+    if (product.stock <= 10) {
+      return <Badge variant="outline" className="text-accent-foreground border-accent">Low Stock ({product.stock} left)</Badge>;
+    }
+    return <Badge variant="default">In Stock</Badge>;
+  };
 
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
@@ -41,6 +52,9 @@ export default function ProductCard({ product, onSelectProduct }: ProductCardPro
         <CardDescription className="text-sm text-muted-foreground mb-2 h-10 overflow-hidden text-ellipsis">
           {product.description}
         </CardDescription>
+        <div className="mb-2">
+          {getStockBadge()}
+        </div>
         <div className="flex items-baseline gap-2">
           <p className="text-xl font-bold text-primary">
             ${displayPrice.toFixed(2)}
@@ -60,3 +74,4 @@ export default function ProductCard({ product, onSelectProduct }: ProductCardPro
     </Card>
   );
 }
+

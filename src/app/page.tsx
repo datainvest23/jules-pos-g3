@@ -10,6 +10,7 @@ import ProductSuggester from '@/components/ProductSuggester';
 import QrCodeDisplay from '@/components/QrCodeDisplay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Leaf, Loader2, X, UserCog } from 'lucide-react';
@@ -41,6 +42,17 @@ export default function HomePage() {
 
   const handleClearSelection = () => {
     setSelectedProduct(null);
+  };
+
+  const getStockBadgeForSelectedProduct = (product: Product | null) => {
+    if (!product) return null;
+    if (product.stock === 0) {
+      return <Badge variant="destructive">Out of Stock</Badge>;
+    }
+    if (product.stock <= 10) {
+      return <Badge variant="outline" className="text-accent-foreground border-accent">Low Stock ({product.stock} left)</Badge>;
+    }
+    return <Badge variant="default">In Stock</Badge>;
   };
 
   return (
@@ -122,6 +134,9 @@ export default function HomePage() {
                     />
                   </div>
                   <p className="text-muted-foreground text-sm">{selectedProduct.description}</p>
+                  <div className="mb-2">
+                    {getStockBadgeForSelectedProduct(selectedProduct)}
+                  </div>
                   <div className="flex items-baseline gap-2">
                     <p className="text-2xl font-bold text-primary">
                       ${(selectedProduct.salePrice ?? selectedProduct.price).toFixed(2)}
@@ -151,3 +166,4 @@ export default function HomePage() {
     </div>
   );
 }
+

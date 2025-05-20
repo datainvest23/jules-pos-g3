@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -5,6 +6,7 @@ import type { Product } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { fetchProductById } from '@/lib/api';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Search, Tag } from 'lucide-react';
@@ -42,6 +44,18 @@ export default function PriceViewer() {
     }
   };
 
+  const getStockBadgeForProduct = (product: Product | null) => {
+    if (!product) return null;
+    if (product.stock === 0) {
+      return <Badge variant="destructive">Out of Stock</Badge>;
+    }
+    if (product.stock <= 10) {
+      return <Badge variant="outline" className="text-accent-foreground border-accent">Low Stock ({product.stock} left)</Badge>;
+    }
+    return <Badge variant="default">In Stock</Badge>;
+  };
+
+
   return (
     <Card className="shadow-lg rounded-lg">
       <CardHeader>
@@ -74,13 +88,15 @@ export default function PriceViewer() {
         {product && searched && (
           <Alert variant="default" className="bg-accent/20">
             <AlertTitle className="font-semibold">{product.name}</AlertTitle>
-            <AlertDescription>
+            <AlertDescription className="space-y-1">
               <p className="text-lg font-bold text-primary">
                 Price: ${ (product.salePrice ?? product.price).toFixed(2) }
                 {product.salePrice && <span className="text-sm text-muted-foreground line-through ml-2">${product.price.toFixed(2)}</span>}
               </p>
+              <div> {/* Wrapper for the badge */}
+                {getStockBadgeForProduct(product)}
+              </div>
               <p className="text-sm text-muted-foreground">Category: {product.category}</p>
-              <p className="text-sm text-muted-foreground">Stock: {product.stock > 0 ? `${product.stock} units available` : 'Out of Stock'}</p>
             </AlertDescription>
           </Alert>
         )}
