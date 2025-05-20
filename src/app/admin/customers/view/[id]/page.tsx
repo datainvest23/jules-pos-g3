@@ -223,7 +223,7 @@ export default function ViewCustomerPage() {
             {Icon && <Icon className="h-5 w-5 text-primary mt-1 flex-shrink-0" />}
             <div>
                 <p className="text-sm text-muted-foreground">{label}</p>
-                <p className="font-medium text-foreground">{displayValue}</p>
+                <div className="font-medium text-foreground">{displayValue}</div>
             </div>
         </div>
     );
