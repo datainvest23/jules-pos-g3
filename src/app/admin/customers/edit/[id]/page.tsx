@@ -29,11 +29,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, UserCog, CalendarIcon, Loader2, Receipt } from 'lucide-react';
-import { fetchCustomerById } from '@/lib/api';
-import type { Customer, TransactionSummary } from '@/types';
-import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, UserCog, CalendarIcon, Loader2, Receipt, Eye } from 'lucide-react';
+import { fetchCustomerById, fetchAllProducts } from '@/lib/api'; // Added fetchAllProducts
+import type { Customer, TransactionSummary, ReceiptData, Product, CartItem } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table';
+import ReceiptDialog from '@/components/ReceiptDialog'; // Import ReceiptDialog
 
 
 // Schema can be reused or defined separately if edit has different validation
@@ -59,6 +59,11 @@ export default function EditCustomerPage() {
   const [isFetchingCustomer, setIsFetchingCustomer] = useState(true);
   const [customerNotFound, setCustomerNotFound] = useState(false);
   const [customerData, setCustomerData] = useState<Customer | null>(null);
+  
+  const [allProducts, setAllProducts] = useState<Product[]>([]); // For mocking receipt items
+  const [isViewReceiptDialogOpen, setIsViewReceiptDialogOpen] = useState(false);
+  const [selectedReceiptForView, setSelectedReceiptForView] = useState<ReceiptData | null>(null);
+
 
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerFormSchema),
@@ -73,6 +78,20 @@ export default function EditCustomerPage() {
       customerSince: new Date(),
     },
   });
+
+  useEffect(() => {
+    // Fetch all products to be used for mocking receipt items
+    const loadProducts = async () => {
+      try {
+        const fetchedProducts = await fetchAllProducts();
+        setAllProducts(fetchedProducts);
+      } catch (error) {
+        console.error("Failed to fetch products for receipt mocking:", error);
+        // Not critical for form, so don't show toast
+      }
+    };
+    loadProducts();
+  }, []);
 
   useEffect(() => {
     if (customerId) {
@@ -157,6 +176,54 @@ export default function EditCustomerPage() {
       variant: "default",
     });
   }
+
+  const handleViewReceipt = (transaction: TransactionSummary) => {
+    if (allProducts.length === 0) {
+        toast({ title: "Cannot Show Receipt", description: "Product data not available to generate receipt details.", variant: "destructive"});
+        return;
+    }
+
+    // Simulate generating cart items for the receipt
+    const mockCartItems: CartItem[] = [];
+    let simulatedTotal = 0;
+    const numItems = Math.floor(Math.random() * 2) + 1; // 1 to 3 items
+
+    for (let i = 0; i < numItems && mockCartItems.length < allProducts.length; i++) {
+        const randomProductIndex = Math.floor(Math.random() * allProducts.length);
+        const product = allProducts[randomProductIndex];
+        // Avoid duplicate products in mock receipt if possible
+        if (mockCartItems.find(item => item.product.id === product.id)) {
+          if (i > 0) i--; // try again to get a different product
+          continue;
+        }
+        const quantity = 1; // Keep it simple with quantity 1
+        const price = product.salePrice ?? product.price;
+        
+        // Try to not exceed the original totalAmount too much
+        if (simulatedTotal + price <= transaction.totalAmount * 1.5 || mockCartItems.length === 0) {
+             mockCartItems.push({ product, quantity });
+             simulatedTotal += price * quantity;
+        } else {
+            break; // Stop adding items if it significantly exceeds total
+        }
+    }
+     // If no items could be added (e.g. all products too expensive), add at least one
+    if (mockCartItems.length === 0 && allProducts.length > 0) {
+        mockCartItems.push({ product: allProducts[0], quantity: 1});
+    }
+
+
+    const receipt: ReceiptData = {
+      items: mockCartItems,
+      transactionId: transaction.transactionId,
+      timestamp: new Date(transaction.timestamp),
+      customerId: customerData?.id,
+      customerName: customerData?.name,
+      totalAmount: transaction.totalAmount, // Use the original total amount
+    };
+    setSelectedReceiptForView(receipt);
+    setIsViewReceiptDialogOpen(true);
+  };
 
   if (isFetchingCustomer) {
     return (
@@ -384,7 +451,7 @@ export default function EditCustomerPage() {
               Purchase History
             </CardTitle>
             <CardDescription>
-              List of transactions made by {customerData.name}.
+              List of transactions made by {customerData.name}. Click on a Transaction ID to view receipt.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -394,14 +461,34 @@ export default function EditCustomerPage() {
                   <TableHead>Transaction ID</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Total Amount</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {customerData.purchaseHistory.map((transaction) => (
                   <TableRow key={transaction.transactionId}>
-                    <TableCell className="font-medium">{transaction.transactionId}</TableCell>
+                    <TableCell className="font-medium">
+                      <Button 
+                        variant="link" 
+                        onClick={() => handleViewReceipt(transaction)}
+                        className="p-0 h-auto text-primary hover:underline"
+                      >
+                        {transaction.transactionId}
+                      </Button>
+                    </TableCell>
                     <TableCell>{format(new Date(transaction.timestamp), 'PPP p')}</TableCell>
                     <TableCell className="text-right">${transaction.totalAmount.toFixed(2)}</TableCell>
+                    <TableCell className="text-center">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleViewReceipt(transaction)}
+                        title="View Receipt"
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span className="sr-only">View Receipt</span>
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -427,6 +514,16 @@ export default function EditCustomerPage() {
         </Card>
       )}
 
+      <ReceiptDialog
+        isOpen={isViewReceiptDialogOpen}
+        onClose={() => {
+            setIsViewReceiptDialogOpen(false);
+            setSelectedReceiptForView(null);
+        }}
+        receiptData={selectedReceiptForView}
+      />
     </div>
   );
 }
+
+    
