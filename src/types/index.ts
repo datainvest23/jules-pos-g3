@@ -18,6 +18,12 @@ export interface SuggestedProduct {
   reason: string;
 }
 
+export interface TransactionSummary {
+  transactionId: string;
+  timestamp: Date;
+  totalAmount: number;
+}
+
 export interface Customer {
   id: string; // Auto-generated or from a system
   name: string;
@@ -30,7 +36,7 @@ export interface Customer {
     zip: string;
   } | null;
   customerSince: Date;
-  // purchaseHistory?: string[]; // Array of order IDs or similar - for future use
+  purchaseHistory?: TransactionSummary[]; 
 }
 
 export interface CartItem {

@@ -29,9 +29,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, UserCog, CalendarIcon, Loader2 } from 'lucide-react';
+import { ArrowLeft, UserCog, CalendarIcon, Loader2, Receipt } from 'lucide-react';
 import { fetchCustomerById } from '@/lib/api';
-import type { Customer } from '@/types';
+import type { Customer, TransactionSummary } from '@/types';
+import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table';
+
 
 // Schema can be reused or defined separately if edit has different validation
 const customerFormSchema = z.object({
@@ -55,10 +58,11 @@ export default function EditCustomerPage() {
 
   const [isFetchingCustomer, setIsFetchingCustomer] = useState(true);
   const [customerNotFound, setCustomerNotFound] = useState(false);
+  const [customerData, setCustomerData] = useState<Customer | null>(null);
 
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerFormSchema),
-    defaultValues: { // Default values are set before fetching
+    defaultValues: { 
       name: '',
       email: '',
       phone: null,
@@ -78,6 +82,7 @@ export default function EditCustomerPage() {
         try {
           const customer = await fetchCustomerById(customerId);
           if (customer) {
+            setCustomerData(customer);
             const formData: CustomerFormValues = {
               name: customer.name,
               email: customer.email,
@@ -88,7 +93,7 @@ export default function EditCustomerPage() {
               addressZip: customer.address?.zip ?? null,
               customerSince: customer.customerSince ? new Date(customer.customerSince) : new Date(),
             };
-            form.reset(formData); // Reset form with fetched data
+            form.reset(formData); 
           } else {
             setCustomerNotFound(true);
             toast({
@@ -124,7 +129,7 @@ export default function EditCustomerPage() {
 
   async function onSubmit(data: CustomerFormValues) {
     const updatedCustomerData = {
-      id: customerId, // Use existing ID
+      id: customerId, 
       name: data.name,
       email: data.email,
       phone: data.phone,
@@ -135,9 +140,9 @@ export default function EditCustomerPage() {
         zip: data.addressZip,
       } : null,
       customerSince: data.customerSince,
+      // purchaseHistory is not part of the form, so it's not included here for update simulation
     };
 
-    // TODO: Implement actual customer update logic (e.g., API call)
     console.log('Updated customer data submitted:', updatedCustomerData);
     toast({
       title: "Customer Updated (Simulated)",
@@ -267,7 +272,7 @@ export default function EditCustomerPage() {
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "PPP")
+                                format(new Date(field.value), "PPP") // Ensure field.value is a Date
                               ) : (
                                 <span>Pick a date</span>
                               )}
@@ -278,8 +283,8 @@ export default function EditCustomerPage() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
+                            selected={field.value instanceof Date ? field.value : new Date(field.value)} // Ensure selected is a Date
+                            onSelect={(date) => field.onChange(date || new Date())} // Ensure onChange receives a Date
                             disabled={(date) =>
                               date > new Date() || date < new Date("1900-01-01")
                             }
@@ -370,6 +375,58 @@ export default function EditCustomerPage() {
           </Form>
         </CardContent>
       </Card>
+
+      {customerData && customerData.purchaseHistory && customerData.purchaseHistory.length > 0 && (
+        <Card className="shadow-lg mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center text-xl">
+              <Receipt className="w-6 h-6 mr-3 text-primary" />
+              Purchase History
+            </CardTitle>
+            <CardDescription>
+              List of transactions made by {customerData.name}.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Transaction ID</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Total Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customerData.purchaseHistory.map((transaction) => (
+                  <TableRow key={transaction.transactionId}>
+                    <TableCell className="font-medium">{transaction.transactionId}</TableCell>
+                    <TableCell>{format(new Date(transaction.timestamp), 'PPP p')}</TableCell>
+                    <TableCell className="text-right">${transaction.totalAmount.toFixed(2)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableCaption>
+                {customerData.purchaseHistory.length} transaction(s) found.
+              </TableCaption>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {customerData && (!customerData.purchaseHistory || customerData.purchaseHistory.length === 0) && (
+         <Card className="shadow-lg mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center text-xl">
+              <Receipt className="w-6 h-6 mr-3 text-primary" />
+              Purchase History
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-center py-4">No purchase history found for this customer.</p>
+          </CardContent>
+        </Card>
+      )}
+
     </div>
   );
 }
