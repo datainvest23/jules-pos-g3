@@ -1,15 +1,36 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import type { Customer } from '@/types';
+import { fetchAllCustomers } from '@/lib/api';
+import { format } from 'date-fns';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Users, ListFilter } from "lucide-react";
-import Link from "next/link";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table";
+import { PlusCircle, Users, Pencil, Trash2, Loader2 } from "lucide-react";
 
 export default function CustomerManagementPage() {
-  // Placeholder for customer data and fetching logic
-  const customers = []; 
-  const isLoading = false;
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCustomers() {
+      setIsLoading(true);
+      try {
+        const fetchedCustomers = await fetchAllCustomers();
+        setCustomers(fetchedCustomers);
+      } catch (error) {
+        console.error("Failed to load customers:", error);
+        // TODO: Add user-friendly error display, e.g., toast
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadCustomers();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -37,29 +58,55 @@ export default function CustomerManagementPage() {
           <CardDescription>
             A list of all customers in your store.
           </CardDescription>
-          {/* Placeholder for filtering options if needed in the future */}
-          {/* 
-          <div className="pt-2">
-            <Button variant="outline" size="sm">
-              <ListFilter className="mr-2 h-4 w-4" />
-              Filter Customers
-            </Button>
-          </div>
-          */}
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-muted-foreground">Loading customers...</p>
+             <div className="flex justify-center items-center py-10">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              <p className="ml-3 text-lg text-muted-foreground">Loading customers...</p>
+            </div>
           ) : customers.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
               <p>No customers found.</p>
               <p className="text-sm">Try adding some customers first!</p>
             </div>
           ) : (
-            <div>
-              {/* Customer table/list will go here */}
-              <p className="text-muted-foreground">Customer listing will be implemented here.</p>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[120px]">Customer ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Customer Since</TableHead>
+                  <TableHead className="text-center w-[150px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.map((customer) => (
+                  <TableRow key={customer.id}>
+                    <TableCell className="font-medium">{customer.id}</TableCell>
+                    <TableCell>{customer.name}</TableCell>
+                    <TableCell>{customer.email}</TableCell>
+                    <TableCell>{customer.phone || 'N/A'}</TableCell>
+                    <TableCell>{format(new Date(customer.customerSince), 'PPP')}</TableCell>
+                    <TableCell className="text-center space-x-2">
+                      <Button variant="outline" size="sm" onClick={() => console.log(`Edit ${customer.id}`)} title="Edit Customer">
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => console.log(`Delete ${customer.id}`)} title="Delete Customer">
+                        <Trash2 className="h-4 w-4" />
+                         <span className="sr-only">Delete</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableCaption>
+                {customers.length} customer(s) listed.
+              </TableCaption>
+            </Table>
           )}
         </CardContent>
       </Card>
