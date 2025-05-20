@@ -8,8 +8,8 @@ export interface Product {
   salePrice?: number;
   imageUrl: string;
   stock: number;
-  optimumStock?: number | null; // New field for optimal stock level
-  supplierId?: string | null; // Optional: ID of the supplier
+  optimumStock?: number | null;
+  supplierId?: string | null;
 }
 
 export interface SuggestedProduct {
@@ -36,7 +36,7 @@ export interface Customer {
     zip: string;
   } | null;
   customerSince: Date;
-  purchaseHistory?: TransactionSummary[]; 
+  purchaseHistory?: TransactionSummary[];
 }
 
 export interface CartItem {
@@ -65,5 +65,32 @@ export interface Supplier {
     state: string;
     zip: string;
   } | null;
-  notes?: string | null; // Any other relevant information
+  notes?: string | null;
+}
+
+// For View Product Page - Sales History
+export interface ProductSalesHistoryItem {
+  transactionId: string;
+  customerId?: string | null;
+  customerName?: string | null;
+  date: Date;
+  quantitySold: number; // This will be simulated for now
+  saleAmount: number; // This will be simulated for now (product price * quantity)
+}
+
+// For AI Product Promotion Flow
+export interface GenerateProductPromotionInput {
+  productId: string;
+  productName: string;
+  productDescription: string;
+  productCategory: string;
+  price: number;
+  salePrice?: number | null;
+  imageUrl: string; // Will not be sent to LLM directly, but good to have for context
+  // Simplified sales history for the prompt
+  recentSalesSummary: Array<{ customerName: string | null, date: string, quantity: number }>;
+}
+
+export interface GenerateProductPromotionOutput {
+  socialMediaPost: string;
 }

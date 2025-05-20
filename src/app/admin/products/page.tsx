@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, ListChecks, Pencil, Trash2, Loader2 } from "lucide-react";
+import { PlusCircle, ListChecks, Pencil, Trash2, Loader2, Eye } from "lucide-react";
 
 export default function ProductManagementPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -57,7 +57,7 @@ export default function ProductManagementPage() {
         <CardHeader>
           <CardTitle>Product List</CardTitle>
           <CardDescription>
-            A list of all products in your store.
+            A list of all products in your store. Click on a Product ID to view details.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -80,13 +80,19 @@ export default function ProductManagementPage() {
                   <TableHead>Category</TableHead>
                   <TableHead className="text-right">Price</TableHead>
                   <TableHead className="text-right">Stock</TableHead>
-                  <TableHead className="text-center w-[150px]">Actions</TableHead>
+                  <TableHead className="text-center w-[180px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {products.map((product) => (
                   <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.id}</TableCell>
+                    <TableCell className="font-medium">
+                       <Button variant="link" asChild className="p-0 h-auto text-primary hover:underline">
+                        <Link href={`/admin/products/view/${product.id}`}>
+                          {product.id}
+                        </Link>
+                      </Button>
+                    </TableCell>
                     <TableCell>{product.name}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{product.category}</Badge>
@@ -103,6 +109,12 @@ export default function ProductManagementPage() {
                     </TableCell>
                     <TableCell className="text-right">{product.stock}</TableCell>
                     <TableCell className="text-center space-x-2">
+                      <Button variant="outline" size="sm" title="View Product" asChild>
+                        <Link href={`/admin/products/view/${product.id}`}>
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">View</span>
+                        </Link>
+                      </Button>
                       <Button variant="outline" size="sm" title="Edit Product" asChild>
                         <Link href={`/admin/products/edit/${product.id}`}>
                           <Pencil className="h-4 w-4" />
