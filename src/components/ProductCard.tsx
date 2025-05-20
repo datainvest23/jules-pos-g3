@@ -7,15 +7,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Eye } from 'lucide-react';
+import { useMode } from '@/context/ModeContext';
 
 interface ProductCardProps {
   product: Product;
   onSelectProduct: (product: Product) => void;
+  onAddToCart?: (product: Product) => void; // Optional: only used in cashier mode
 }
 
-export default function ProductCard({ product, onSelectProduct }: ProductCardProps) {
+export default function ProductCard({ product, onSelectProduct, onAddToCart }: ProductCardProps) {
   const displayPrice = product.salePrice ?? product.price;
   const originalPrice = product.salePrice ? product.price : null;
+  const { mode } = useMode();
 
   const getStockBadge = () => {
     if (product.stock === 0) {
@@ -66,12 +69,20 @@ export default function ProductCard({ product, onSelectProduct }: ProductCardPro
           )}
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-4 pt-0 grid grid-cols-1 gap-2">
         <Button onClick={() => onSelectProduct(product)} className="w-full" variant="outline">
           <Eye className="mr-2 h-4 w-4" /> View Details
         </Button>
+        {mode === 'cashier' && onAddToCart && (
+           <Button 
+            onClick={() => onAddToCart(product)} 
+            className="w-full"
+            disabled={product.stock === 0}
+            >
+            <ShoppingCart className="mr-2 h-4 w-4" /> Add to Sale
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
 }
-

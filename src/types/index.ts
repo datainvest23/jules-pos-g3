@@ -33,13 +33,18 @@ export interface Customer {
   // purchaseHistory?: string[]; // Array of order IDs or similar - for future use
 }
 
-export interface ReceiptData {
+export interface CartItem {
   product: Product;
-  transactionId: string;
   quantity: number;
+}
+
+export interface ReceiptData {
+  items: CartItem[];
+  transactionId: string;
   timestamp: Date;
   customerId?: string | null;
   customerName?: string | null;
+  totalAmount: number;
 }
 
 export interface Supplier {

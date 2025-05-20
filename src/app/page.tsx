@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import type { Product, ReceiptData, Customer } from '@/types';
+import { useState, useEffect, useCallback } from 'react';
+import type { Product, ReceiptData, Customer, CartItem } from '@/types';
 import { fetchAllProducts, fetchAllCustomers } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
 import PriceViewer from '@/components/PriceViewer';
@@ -19,6 +19,8 @@ import { Leaf, Loader2, X, UserCog, ShoppingCart, ShieldCheck, Store } from 'luc
 import { useMode } from '@/context/ModeContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -27,10 +29,13 @@ export default function HomePage() {
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
   const { mode, toggleMode, setMode } = useMode();
+  const { toast } = useToast();
 
   const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
   const [isLoadingAllCustomers, setIsLoadingAllCustomers] = useState(true);
   const [selectedSaleCustomer, setSelectedSaleCustomer] = useState<Customer | null>(null);
+
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -40,6 +45,7 @@ export default function HomePage() {
         setProducts(fetchedProducts);
       } catch (error) {
         console.error("Failed to fetch products:", error);
+        toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
       } finally {
         setIsLoadingProducts(false);
       }
@@ -53,12 +59,13 @@ export default function HomePage() {
         setAllCustomers(fetchedCustomers);
       } catch (error) {
         console.error("Failed to fetch customers:", error);
+        toast({ title: "Error", description: "Failed to load customers.", variant: "destructive" });
       } finally {
         setIsLoadingAllCustomers(false);
       }
     };
     loadCustomers();
-  }, []);
+  }, [toast]);
 
   const handleSelectProduct = (product: Product) => {
     setSelectedProduct(product);
@@ -79,22 +86,88 @@ export default function HomePage() {
     return <Badge variant="default">In Stock</Badge>;
   };
 
-  const handleBuyNow = (product: Product) => {
-    if (product.stock === 0) {
-      alert("This product is out of stock and cannot be purchased.");
+  const handleAddToCart = (productToAdd: Product) => {
+    if (productToAdd.stock === 0) {
+      toast({
+        title: "Out of Stock",
+        description: `${productToAdd.name} is currently out of stock.`,
+        variant: "destructive",
+      });
       return;
     }
+
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find(item => item.product.id === productToAdd.id);
+      if (existingItem) {
+        // Check if adding another exceeds stock
+        if (existingItem.quantity + 1 > productToAdd.stock) {
+             toast({
+                title: "Stock Limit Reached",
+                description: `Cannot add more ${productToAdd.name} than available in stock (${productToAdd.stock}).`,
+                variant: "destructive",
+            });
+            return prevItems;
+        }
+        return prevItems.map(item =>
+          item.product.id === productToAdd.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      } else {
+         // Check if adding the first item exceeds stock (should not happen if stock > 0 check passed initially)
+        if (1 > productToAdd.stock) {
+            toast({
+                title: "Stock Limit Reached",
+                description: `Cannot add ${productToAdd.name} as it exceeds available stock (${productToAdd.stock}).`,
+                variant: "destructive",
+            });
+            return prevItems;
+        }
+        return [...prevItems, { product: productToAdd, quantity: 1 }];
+      }
+    });
+    toast({
+      title: "Item Added",
+      description: `${productToAdd.name} has been added to the sale.`,
+      variant: "default"
+    });
+  };
+
+  const handleCheckout = () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "Empty Sale",
+        description: "Please add items to the sale before checking out.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const totalAmount = cartItems.reduce((total, item) => {
+      const price = item.product.salePrice ?? item.product.price;
+      return total + (price * item.quantity);
+    }, 0);
+
     const newReceiptData: ReceiptData = {
-      product: product,
+      items: cartItems,
       transactionId: `TXN-${Date.now().toString().slice(-8)}`,
-      quantity: 1,
       timestamp: new Date(),
       customerId: selectedSaleCustomer?.id || null,
       customerName: selectedSaleCustomer?.name || null,
+      totalAmount: totalAmount,
     };
     setReceiptData(newReceiptData);
     setIsReceiptDialogOpen(true);
   };
+  
+  const handleClearCart = useCallback(() => {
+    setCartItems([]);
+    setSelectedSaleCustomer(null); // Also clear selected customer
+    toast({
+      title: "Sale Cleared",
+      description: "All items have been removed from the current sale.",
+    });
+  }, [toast]);
 
   const handleAdminNavigation = () => {
     setMode('admin'); 
@@ -146,6 +219,10 @@ export default function HomePage() {
               onSelectCustomer={setSelectedSaleCustomer}
               customers={allCustomers}
               isLoadingCustomers={isLoadingAllCustomers}
+              cartItems={cartItems}
+              onCheckout={handleCheckout}
+              onClearCart={handleClearCart}
+              setCartItems={setCartItems}
             />
           </>
         ) : (
@@ -157,7 +234,7 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           <section className={`transition-all duration-300 ease-in-out ${selectedProduct ? 'lg:col-span-8' : 'lg:col-span-12'}`}>
-            {mode === 'cashier' && !selectedProduct && ( // Show price viewer only if no product is selected for details
+            {mode === 'cashier' && !selectedProduct && (
               <div className="mb-6">
                  <PriceViewer />
               </div>
@@ -174,7 +251,7 @@ export default function HomePage() {
             ) : products.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {products.map((product) => (
-                  <ProductCard key={product.id} product={product} onSelectProduct={handleSelectProduct} />
+                  <ProductCard key={product.id} product={product} onSelectProduct={handleSelectProduct} onAddToCart={mode === 'cashier' ? handleAddToCart : undefined}/>
                 ))}
               </div>
             ) : (
@@ -229,12 +306,12 @@ export default function HomePage() {
                   </div>
                   
                   <Button 
-                    onClick={() => handleBuyNow(selectedProduct)} 
+                    onClick={() => handleAddToCart(selectedProduct)} 
                     className="w-full mt-4"
-                    disabled={selectedProduct.stock === 0}
+                    disabled={selectedProduct.stock === 0 && mode === 'cashier'}
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    {mode === 'cashier' ? 'Add to Sale' : 'Simulate Purchase'}
+                    {mode === 'cashier' ? 'Add to Sale' : 'Simulate Add to Sale'}
                   </Button>
                   
                   <ProductSuggester product={selectedProduct} />
@@ -256,7 +333,12 @@ export default function HomePage() {
       
       <ReceiptDialog 
         isOpen={isReceiptDialogOpen} 
-        onClose={() => setIsReceiptDialogOpen(false)} 
+        onClose={() => {
+          setIsReceiptDialogOpen(false);
+          if (receiptData) { // If receipt was shown, clear cart for next sale
+              handleClearCart();
+          }
+        }} 
         receiptData={receiptData} 
       />
     </div>
