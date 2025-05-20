@@ -23,9 +23,11 @@ export default function CustomerManagementPage() {
             View, add, and manage your store's customers.
           </p>
         </div>
-        <Button onClick={() => console.log('Add new customer clicked. TODO: Link to /admin/customers/new')}>
-          <PlusCircle className="mr-2 h-5 w-5" />
-          Add New Customer
+        <Button asChild>
+          <Link href="/admin/customers/new">
+            <PlusCircle className="mr-2 h-5 w-5" />
+            Add New Customer
+          </Link>
         </Button>
       </div>
 
