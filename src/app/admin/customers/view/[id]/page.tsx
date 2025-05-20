@@ -9,15 +9,15 @@ import { format } from "date-fns";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, User, CalendarIcon, Loader2, Receipt, Eye, Info, Brain, Building, Mail, Phone, MapPin } from 'lucide-react';
+import { ArrowLeft, User, CalendarIcon, Loader2, Receipt, Eye, Info, Brain, Building, Mail, Phone, MapPin, Pencil } from 'lucide-react';
 import { fetchCustomerById, fetchAllProducts } from '@/lib/api';
 import type { Customer, TransactionSummary, ReceiptData, Product, CartItem } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table';
 import ReceiptDialog from '@/components/ReceiptDialog';
 import { Separator } from '@/components/ui/separator';
 
-// AI Profile section imports (will be uncommented and used later)
-// import { generateCustomerProfile, GenerateCustomerProfileInput } from '@/ai/flows/generate-customer-profile-flow';
+// AI Profile section imports
+import { generateCustomerProfile, type GenerateCustomerProfileInput } from '@/ai/flows/generate-customer-profile-flow';
 
 
 export default function ViewCustomerPage() {
@@ -34,10 +34,10 @@ export default function ViewCustomerPage() {
   const [isViewReceiptDialogOpen, setIsViewReceiptDialogOpen] = useState(false);
   const [selectedReceiptForView, setSelectedReceiptForView] = useState<ReceiptData | null>(null);
 
-  // AI Profile State (will be used later)
-  // const [isGeneratingAiProfile, setIsGeneratingAiProfile] = useState(false);
-  // const [aiProfile, setAiProfile] = useState<string | null>(null);
-  // const [aiProfileError, setAiProfileError] = useState<string | null>(null);
+  // AI Profile State
+  const [isGeneratingAiProfile, setIsGeneratingAiProfile] = useState(false);
+  const [aiProfile, setAiProfile] = useState<string | null>(null);
+  const [aiProfileError, setAiProfileError] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -58,6 +58,8 @@ export default function ViewCustomerPage() {
       const loadCustomer = async () => {
         setIsFetchingCustomer(true);
         setCustomerNotFound(false);
+        setAiProfile(null); // Reset AI profile when customer changes
+        setAiProfileError(null);
         try {
           const customer = await fetchCustomerById(customerId);
           if (customer) {
@@ -136,26 +138,34 @@ export default function ViewCustomerPage() {
     setIsViewReceiptDialogOpen(true);
   };
 
-  // const handleGenerateAiProfile = async () => { // Will be implemented later
-  //   if (!customerData) return;
-  //   setIsGeneratingAiProfile(true);
-  //   setAiProfile(null);
-  //   setAiProfileError(null);
-  //   try {
-  //     const input: GenerateCustomerProfileInput = {
-  //       customerId: customerData.id,
-  //       purchaseHistory: customerData.purchaseHistory || [],
-  //     };
-  //     const result = await generateCustomerProfile(input); // This flow needs to be created
-  //     setAiProfile(result.profile);
-  //   } catch (error) {
-  //     console.error("Failed to generate AI profile:", error);
-  //     setAiProfileError("Could not generate AI customer profile. Please try again.");
-  //     toast({ title: "AI Profile Error", description: "Failed to generate profile.", variant: "destructive" });
-  //   } finally {
-  //     setIsGeneratingAiProfile(false);
-  //   }
-  // };
+  const handleGenerateAiProfile = async () => {
+    if (!customerData) return;
+    setIsGeneratingAiProfile(true);
+    setAiProfile(null);
+    setAiProfileError(null);
+    try {
+      const input: GenerateCustomerProfileInput = {
+        customerId: customerData.id,
+        customerSince: customerData.customerSince.toISOString(),
+        purchaseHistory: (customerData.purchaseHistory || []).map(txn => ({
+            ...txn,
+            timestamp: txn.timestamp.toISOString(),
+        })),
+      };
+      const result = await generateCustomerProfile(input);
+      setAiProfile(result.profile);
+    } catch (error) {
+      console.error("Failed to generate AI profile:", error);
+      let errorMessage = "Could not generate AI customer profile. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = error.message.includes("blocked") ? "Content generation blocked by safety filters. Please review input or try a different approach." : error.message;
+      }
+      setAiProfileError(errorMessage);
+      toast({ title: "AI Profile Error", description: errorMessage, variant: "destructive" });
+    } finally {
+      setIsGeneratingAiProfile(false);
+    }
+  };
 
 
   if (isFetchingCustomer) {
@@ -266,7 +276,6 @@ export default function ViewCustomerPage() {
         </CardContent>
       </Card>
       
-      {/* Placeholder for AI Profile Card - to be implemented later */}
       <Card className="shadow-lg md:col-span-1 h-fit">
         <CardHeader>
           <CardTitle className="flex items-center text-xl">
@@ -275,21 +284,18 @@ export default function ViewCustomerPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-           {/* 
            {isGeneratingAiProfile && <div className="flex items-center justify-center p-4"><Loader2 className="h-6 w-6 animate-spin mr-2"/>Generating...</div>}
            {aiProfileError && <p className="text-destructive text-sm">{aiProfileError}</p>}
            {aiProfile && !isGeneratingAiProfile && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{aiProfile}</p>}
            {!isGeneratingAiProfile && !aiProfile && !aiProfileError && <p className="text-sm text-muted-foreground">Click the button to generate an AI-powered profile.</p>}
            <Button 
             onClick={handleGenerateAiProfile} 
-            disabled={isGeneratingAiProfile} 
+            disabled={isGeneratingAiProfile || !customerData} 
             className="w-full mt-4"
            >
             {isGeneratingAiProfile ? <Loader2 className="h-4 w-4 animate-spin mr-2"/> : <Brain className="h-4 w-4 mr-2"/>}
             Generate AI Profile
            </Button> 
-           */}
-           <p className="text-sm text-muted-foreground">AI profile generation feature coming soon.</p>
         </CardContent>
       </Card>
     </div>
@@ -377,3 +383,4 @@ export default function ViewCustomerPage() {
     </div>
   );
 }
+
