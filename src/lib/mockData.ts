@@ -10,6 +10,7 @@ export const mockProducts: Product[] = [
     price: 5.99,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "fruit organic"
     stock: 150,
+    optimumStock: 200,
     supplierId: 'SUPP-001-HG',
   },
   {
@@ -21,6 +22,7 @@ export const mockProducts: Product[] = [
     salePrice: 10.99,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "supplement pill"
     stock: 80,
+    optimumStock: 100,
     supplierId: 'SUPP-002-VN',
   },
   {
@@ -31,6 +33,7 @@ export const mockProducts: Product[] = [
     price: 29.99,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "fitness yoga"
     stock: 45,
+    optimumStock: 50,
     supplierId: 'SUPP-003-ES',
   },
   {
@@ -41,6 +44,7 @@ export const mockProducts: Product[] = [
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "supplement powder"
     stock: 60,
+    optimumStock: 75,
     supplierId: 'SUPP-001-HG',
   },
   {
@@ -51,6 +55,7 @@ export const mockProducts: Product[] = [
     price: 7.29,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "tea herb"
     stock: 120,
+    optimumStock: 150,
     supplierId: 'SUPP-002-VN',
   },
   {
@@ -61,6 +66,7 @@ export const mockProducts: Product[] = [
     price: 24.95,
     imageUrl: 'https://placehold.co/600x400.png', // data-ai-hint: "supplement capsule"
     stock: 70,
+    optimumStock: 90,
     supplierId: 'SUPP-001-HG',
   },
 ];

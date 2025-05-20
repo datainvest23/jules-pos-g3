@@ -8,6 +8,7 @@ export interface Product {
   salePrice?: number;
   imageUrl: string;
   stock: number;
+  optimumStock?: number | null; // New field for optimal stock level
   supplierId?: string | null; // Optional: ID of the supplier
 }
 

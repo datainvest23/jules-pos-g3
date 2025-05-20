@@ -40,6 +40,7 @@ const productFormSchema = z.object({
   price: z.coerce.number({invalid_type_error: "Price must be a number."}).positive("Price must be positive."),
   salePrice: z.coerce.number({invalid_type_error: "Sale price must be a number."}).nonnegative("Sale price cannot be negative.").optional().nullable(),
   stock: z.coerce.number({invalid_type_error: "Stock must be a number."}).int("Stock must be a whole number.").min(0, "Stock cannot be negative."),
+  optimumStock: z.coerce.number({invalid_type_error: "Optimum stock must be a number."}).int("Optimum stock must be a whole number.").min(0, "Optimum stock cannot be negative.").optional().nullable(),
   imageUrl: z.string().url({ message: "Please enter a valid URL for the image." }).min(1, "Image URL is required."),
 });
 
@@ -63,10 +64,11 @@ export default function EditProductPage() {
       name: '',
       description: '',
       category: undefined,
-      supplierId: null,
+      supplierId: NO_SUPPLIER_VALUE,
       price: undefined,
       salePrice: null,
       stock: undefined,
+      optimumStock: null,
       imageUrl: '',
     },
   });
@@ -104,10 +106,11 @@ export default function EditProductPage() {
                 name: product.name,
                 description: product.description,
                 category: product.category as ProductFormValues['category'], // Ensure type compatibility
-                supplierId: product.supplierId ?? null, // Ensure null if undefined
+                supplierId: product.supplierId === undefined ? NO_SUPPLIER_VALUE : (product.supplierId ?? NO_SUPPLIER_VALUE),
                 price: product.price,
                 salePrice: product.salePrice ?? null,
                 stock: product.stock,
+                optimumStock: product.optimumStock ?? null,
                 imageUrl: product.imageUrl,
             };
             form.reset(formData);
@@ -296,7 +299,7 @@ export default function EditProductPage() {
                       <FormLabel>Supplier <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
                       <Select
                         onValueChange={(value) => field.onChange(value === NO_SUPPLIER_VALUE ? null : value)}
-                        value={field.value === null ? NO_SUPPLIER_VALUE : (field.value ?? undefined)}
+                        value={field.value === null || field.value === undefined ? NO_SUPPLIER_VALUE : field.value}
                         disabled={isLoadingSuppliers}
                       >
                         <FormControl>
@@ -351,6 +354,28 @@ export default function EditProductPage() {
                     </FormItem>
                   )}
                 />
+                 <FormField
+                  control={form.control}
+                  name="optimumStock"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Optimum Stock <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="e.g., 150"
+                          {...field}
+                          onChange={event => field.onChange(event.target.value === '' ? null : +event.target.value)}
+                          value={field.value ?? ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
                 <FormField
                   control={form.control}
                   name="price"
@@ -371,29 +396,28 @@ export default function EditProductPage() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="salePrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sale Price ($) <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="e.g., 15.99"
+                          {...field}
+                          onChange={event => field.onChange(event.target.value === '' ? null : +event.target.value)}
+                          value={field.value ?? ''}
+                        />
+                      </FormControl>
+                      <FormDescription>Leave blank if the product is not on sale.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-
-              <FormField
-                control={form.control}
-                name="salePrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sale Price ($) <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="e.g., 15.99"
-                        {...field}
-                        onChange={event => field.onChange(event.target.value === '' ? null : +event.target.value)}
-                        value={field.value ?? ''}
-                      />
-                    </FormControl>
-                    <FormDescription>Leave blank if the product is not on sale.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
