@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Leaf, Loader2, X, UserCog, ShoppingCart, ShieldCheck, Store, Filter } from 'lucide-react';
+import { Leaf, Loader2, X, UserCog, ShoppingCart, ShieldCheck, Store, Filter, ShoppingBag } from 'lucide-react'; // Added ShoppingBag
 import { useMode } from '@/context/ModeContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -197,6 +197,11 @@ export default function HomePage() {
             <span>HealthStore Central</span>
           </div>
           <div className="flex items-center space-x-4">
+            <Button variant="ghost" asChild>
+                <Link href="/shop">
+                    <ShoppingBag className="mr-2 h-4 w-4" /> Online Shop
+                </Link>
+            </Button>
             <div className="flex items-center space-x-2">
               <Store className={`h-5 w-5 ${mode === 'cashier' ? 'text-primary' : 'text-muted-foreground'}`} />
               <Switch
@@ -363,6 +368,9 @@ export default function HomePage() {
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
             &copy; {new Date().getFullYear()} HealthStore Central. All rights reserved.
           </p>
+           <Link href="/shop" className="text-sm font-medium text-primary hover:underline">
+              Visit our Online Shop
+           </Link>
         </div>
       </footer>
       
@@ -379,4 +387,3 @@ export default function HomePage() {
     </div>
   );
 }
-
