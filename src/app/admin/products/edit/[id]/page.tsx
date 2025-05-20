@@ -28,6 +28,8 @@ import { fetchProductById, fetchAllSuppliers } from '@/lib/api';
 import type { Product, Supplier } from '@/types';
 
 const productCategories = ["Supplements", "Organic Foods", "Wellness Items", "Beverages", "Snacks"] as const;
+const NO_SUPPLIER_VALUE = "___NO_SUPPLIER_SELECTED___";
+const NO_SUPPLIERS_AVAILABLE_VALUE = "___NO_SUPPLIERS_AVAILABLE___";
 
 const productFormSchema = z.object({
   id: z.string().min(1, "SKU/ID is required."),
@@ -56,12 +58,12 @@ export default function EditProductPage() {
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: { 
+    defaultValues: {
       id: '',
       name: '',
       description: '',
       category: undefined,
-      supplierId: null, 
+      supplierId: null,
       price: undefined,
       salePrice: null,
       stock: undefined,
@@ -101,8 +103,8 @@ export default function EditProductPage() {
                 id: product.id,
                 name: product.name,
                 description: product.description,
-                category: product.category as ProductFormValues['category'],
-                supplierId: product.supplierId ?? null,
+                category: product.category as ProductFormValues['category'], // Ensure type compatibility
+                supplierId: product.supplierId ?? null, // Ensure null if undefined
                 price: product.price,
                 salePrice: product.salePrice ?? null,
                 stock: product.stock,
@@ -132,7 +134,7 @@ export default function EditProductPage() {
       loadProduct();
     } else {
         setIsFetchingProduct(false);
-        setProductNotFound(true); 
+        setProductNotFound(true);
          toast({
             title: "Error",
             description: "Product ID is missing.",
@@ -142,14 +144,18 @@ export default function EditProductPage() {
   }, [productId, form, toast]);
 
   async function onSubmit(data: ProductFormValues) {
-    console.log('Updated product data submitted:', data);
+     const processedData = {
+      ...data,
+      supplierId: data.supplierId === NO_SUPPLIER_VALUE ? null : data.supplierId,
+    };
+    console.log('Updated product data submitted:', processedData);
     toast({
       title: "Product Updated (Simulated)",
       description: (
         <div className="mt-2 w-[340px] rounded-md bg-muted p-4">
           <p className="text-sm text-foreground">The following product data was prepared for update:</p>
           <pre className="mt-1 text-xs">
-            <code className="text-foreground">{JSON.stringify(data, null, 2)}</code>
+            <code className="text-foreground">{JSON.stringify(processedData, null, 2)}</code>
           </pre>
         </div>
       ),
@@ -288,10 +294,10 @@ export default function EditProductPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Supplier <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        value={field.value ?? undefined} // Use field.value, default to undefined if null for placeholder
-                        disabled={isLoadingSuppliers || suppliers.length === 0}
+                      <Select
+                        onValueChange={(value) => field.onChange(value === NO_SUPPLIER_VALUE ? null : value)}
+                        value={field.value === null ? NO_SUPPLIER_VALUE : (field.value ?? undefined)}
+                        disabled={isLoadingSuppliers}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -304,10 +310,10 @@ export default function EditProductPage() {
                               <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading...
                             </div>
                           ) : suppliers.length === 0 ? (
-                             <SelectItem value="no-supplier" disabled>No suppliers available</SelectItem>
+                             <SelectItem value={NO_SUPPLIERS_AVAILABLE_VALUE} disabled>No suppliers available</SelectItem>
                           ) : (
                             <>
-                              <SelectItem value=""><em>None</em></SelectItem>
+                              <SelectItem value={NO_SUPPLIER_VALUE}><em>None</em></SelectItem>
                               {suppliers.map(supplier => (
                                 <SelectItem key={supplier.id} value={supplier.id}>{supplier.name}</SelectItem>
                               ))}
@@ -316,7 +322,7 @@ export default function EditProductPage() {
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        {suppliers.length > 0 ? "Choose the supplier for this product." : isLoadingSuppliers ? "" : 
+                        {suppliers.length > 0 ? "Choose the supplier for this product." : isLoadingSuppliers ? "" :
                         <span>No suppliers found. <Link href="/admin/suppliers/new" className="text-primary hover:underline">Add a supplier?</Link></span>}
                       </FormDescription>
                       <FormMessage />
@@ -333,10 +339,10 @@ export default function EditProductPage() {
                     <FormItem>
                       <FormLabel>Stock Quantity</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="e.g., 100" 
-                          {...field} 
+                        <Input
+                          type="number"
+                          placeholder="e.g., 100"
+                          {...field}
                           onChange={event => field.onChange(event.target.value === '' ? undefined : +event.target.value)}
                           value={field.value ?? ''}
                         />
@@ -352,11 +358,11 @@ export default function EditProductPage() {
                     <FormItem>
                       <FormLabel>Regular Price ($)</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.01" 
-                          placeholder="e.g., 19.99" 
-                          {...field} 
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="e.g., 19.99"
+                          {...field}
                           onChange={event => field.onChange(event.target.value === '' ? undefined : +event.target.value)}
                           value={field.value ?? ''}
                         />
@@ -366,7 +372,7 @@ export default function EditProductPage() {
                   )}
                 />
               </div>
-              
+
               <FormField
                 control={form.control}
                 name="salePrice"
@@ -374,11 +380,11 @@ export default function EditProductPage() {
                   <FormItem>
                     <FormLabel>Sale Price ($) <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.01" 
-                        placeholder="e.g., 15.99" 
-                        {...field} 
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="e.g., 15.99"
+                        {...field}
                         onChange={event => field.onChange(event.target.value === '' ? null : +event.target.value)}
                         value={field.value ?? ''}
                       />
@@ -399,14 +405,14 @@ export default function EditProductPage() {
                       <Input placeholder="https://placehold.co/600x400.png" {...field} />
                     </FormControl>
                     <FormDescription>
-                      Enter a direct link to the product image. For placeholders, you can use sites like 
+                      Enter a direct link to the product image. For placeholders, you can use sites like
                       <Link href="https://placehold.co" target="_blank" className="text-primary hover:underline ml-1">placehold.co</Link>.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <div className="flex justify-end space-x-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => router.push('/admin/products')}>
                   Cancel
