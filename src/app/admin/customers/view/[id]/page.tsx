@@ -149,7 +149,7 @@ export default function ViewCustomerPage() {
         customerSince: customerData.customerSince.toISOString(),
         purchaseHistory: (customerData.purchaseHistory || []).map(txn => ({
             ...txn,
-            timestamp: txn.timestamp.toISOString(),
+            timestamp: txn.timestamp.toISOString(), // Ensure timestamp is ISO string
         })),
       };
       const result = await generateCustomerProfile(input);
@@ -286,7 +286,7 @@ export default function ViewCustomerPage() {
         <CardContent>
            {isGeneratingAiProfile && <div className="flex items-center justify-center p-4"><Loader2 className="h-6 w-6 animate-spin mr-2"/>Generating...</div>}
            {aiProfileError && <p className="text-destructive text-sm">{aiProfileError}</p>}
-           {aiProfile && !isGeneratingAiProfile && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{aiProfile}</p>}
+           {aiProfile && !isGeneratingAiProfile && <div className="text-sm text-muted-foreground whitespace-pre-wrap">{aiProfile}</div>}
            {!isGeneratingAiProfile && !aiProfile && !aiProfileError && <p className="text-sm text-muted-foreground">Click the button to generate an AI-powered profile.</p>}
            <Button 
             onClick={handleGenerateAiProfile} 
@@ -384,3 +384,5 @@ export default function ViewCustomerPage() {
   );
 }
 
+
+    
